@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Text } from '../../components/typography/Text';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import Colors from '../../constants/Colors';
@@ -70,6 +70,7 @@ function RegisterContent() {
   // Filters for Herd at a Glance
   const [selectedBreed, setSelectedBreed] = useState('all');
   const [selectedSource, setSelectedSource] = useState('all');
+  const [chartSlideIndex, setChartSlideIndex] = useState(0);
   
   const { drugData, addRecord: addDrugRecord, updateRecord: updateDrugRecord, deleteRecord: deleteDrugRecord } = useDrug();
   const { mortalityData, addRecord: addMortalityRecord, updateRecord: updateMortalityRecord, deleteRecord: deleteMortalityRecord } = useMortality();
@@ -208,6 +209,27 @@ function RegisterContent() {
     { label: 'Born', value: 'born' },
     { label: 'Purchased', value: 'purchased' },
   ];
+
+  // Prepare charts array for horizontal scrolling
+  const charts = [
+    ...(breedDistribution.length > 0 ? [{
+      id: 'breed',
+      title: 'Breed Distribution',
+      data: breedDistribution
+    }] : []),
+    ...(stockTypeDistribution.length > 0 ? [{
+      id: 'stock',
+      title: 'Stock Type Breakdown',
+      data: stockTypeDistribution
+    }] : []),
+    ...(ageDistribution.length > 0 ? [{
+      id: 'age',
+      title: 'Age Distribution',
+      data: ageDistribution
+    }] : [])
+  ];
+
+  const screenWidth = Dimensions.get('window').width;
 
   // Herd Register handlers
   const handleAddHerd = () => {
@@ -772,38 +794,53 @@ function RegisterContent() {
         </View>
 
         {/* Charts */}
-        <View style={styles.chartsContainer}>
-          {breedDistribution.length > 0 && (
-            <View style={styles.chartItem}>
-              <Text variant="h6" weight="medium" style={styles.chartTitle}>
-                Breed Distribution
-              </Text>
-              <PieChart data={breedDistribution} height={200} />
-            </View>
-          )}
-          
-          {stockTypeDistribution.length > 0 && (
-            <View style={styles.chartItem}>
-              <Text variant="h6" weight="medium" style={styles.chartTitle}>
-                Stock Type Breakdown
-              </Text>
-              <PieChart data={stockTypeDistribution} height={200} />
-            </View>
-          )}
-          
-          {ageDistribution.length > 0 && (
-            <View style={styles.chartItem}>
-              <Text variant="h6" weight="medium" style={styles.chartTitle}>
-                Age Distribution
-              </Text>
-              <PieChart data={ageDistribution} height={200} />
-            </View>
-          )}
-        </View>
+        {charts.length > 0 && (
+          <View style={styles.chartsContainer}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={(event) => {
+                const slide = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+                setChartSlideIndex(slide);
+              }}
+              scrollEventThrottle={16}
+              style={styles.chartsScrollView}
+            >
+              {charts.map((chart) => (
+                <View key={chart.id} style={[styles.chartSlide, { width: screenWidth - 32 }]}>
+                  <Text variant="h6" weight="medium" style={styles.chartTitle}>
+                    {chart.title}
+                  </Text>
+                  <PieChart data={chart.data} height={200} />
+                </View>
+              ))}
+            </ScrollView>
+            
+            {charts.length > 1 && (
+              <View style={styles.paginationContainer}>
+                {charts.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.paginationDot,
+                      chartSlideIndex === index && styles.paginationDotActive,
+                    ]}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
-        <View style={styles.tabs}>
+      <View style={styles.tabsContainer}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsScrollContent}
+          style={styles.tabsScrollView}
+        >
           {tabs.map((tab) => (
             <TouchableOpacity
               key={tab.id}
@@ -814,13 +851,21 @@ function RegisterContent() {
                 variant="body2"
                 weight={activeTab === tab.id ? 'medium' : 'regular'}
                 color={activeTab === tab.id ? 'primary.500' : 'neutral.600'}
+                style={styles.tabText}
               >
                 {tab.title}
               </Text>
             </TouchableOpacity>
           ))}
+        </ScrollView>
+        
+        {/* Scroll indicator */}
+        <View style={styles.scrollIndicator}>
+          <View style={styles.scrollIndicatorDot} />
+          <View style={styles.scrollIndicatorDot} />
+          <View style={styles.scrollIndicatorDot} />
         </View>
-      </ScrollView>
+      </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {renderContent()}
@@ -835,24 +880,47 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.neutral[50],
   },
   tabsContainer: {
-    maxHeight: 50,
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.neutral[200],
-    backgroundColor: Colors.white,
+    paddingVertical: 8,
   },
-  tabs: {
-    flexDirection: 'row',
+  tabsScrollView: {
+    maxHeight: 60,
+  },
+  tabsScrollContent: {
     paddingHorizontal: 16,
+    alignItems: 'center',
   },
   tab: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     marginRight: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    minWidth: 100,
+    alignItems: 'center',
   },
   activeTab: {
-    borderBottomColor: Colors.primary[500],
+    backgroundColor: Colors.primary[50],
+    borderColor: Colors.primary[200],
+  },
+  tabText: {
+    textAlign: 'center',
+  },
+  scrollIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 4,
+    gap: 4,
+  },
+  scrollIndicatorDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.neutral[400],
   },
   content: {
     flex: 1,
@@ -900,12 +968,33 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   chartsContainer: {
-    gap: 24,
+    marginBottom: 24,
   },
-  chartItem: {
+  chartsScrollView: {
+    marginHorizontal: -16,
+  },
+  chartSlide: {
+    paddingHorizontal: 16,
     alignItems: 'center',
   },
   chartTitle: {
     marginBottom: 12,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.neutral[300],
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: Colors.primary[500],
+    width: 16,
   },
 });
