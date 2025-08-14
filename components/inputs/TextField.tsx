@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.neutral[300],
     borderRadius: 8,
     backgroundColor: Colors.white,
+    minHeight: 44,
   },
   focused: {
     borderColor: Colors.primary[500],
@@ -115,8 +116,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 48,
+    minHeight: 44,
     paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
     color: Colors.neutral[800],
   },

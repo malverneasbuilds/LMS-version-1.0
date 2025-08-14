@@ -49,7 +49,7 @@ export default function SignupScreen() {
 
       <View style={styles.formContainer}>
         <Text variant="h4" weight="bold" style={styles.title}>
-          Join LiveStock
+          Join Devor
         </Text>
         <Text variant="body" color="neutral.600" style={styles.subtitle}>
           Create your account to start managing your livestock
@@ -62,7 +62,6 @@ export default function SignupScreen() {
           onChangeText={setName}
           startIcon={<User size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
-          error={error && name === '' ? 'Name is required' : ''}
         />
 
         <TextField
@@ -74,7 +73,6 @@ export default function SignupScreen() {
           autoCapitalize="none"
           startIcon={<Mail size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
-          error={error && email === '' ? 'Email is required' : ''}
         />
 
         <TextField
@@ -85,7 +83,6 @@ export default function SignupScreen() {
           isPassword
           startIcon={<KeyRound size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
-          error={error && password === '' ? 'Password is required' : ''}
         />
 
         <TextField
@@ -96,7 +93,6 @@ export default function SignupScreen() {
           isPassword
           startIcon={<KeyRound size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
-          error={password !== confirmPassword ? 'Passwords do not match' : ''}
         />
 
         {error && (
@@ -143,11 +139,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   signupButton: {
     marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   loginContainer: {
     flexDirection: 'row',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
+import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -115,6 +116,12 @@ export function MortalityRegisterModal({ visible, onClose, onSave, editRecord }:
             value={formData.date_of_event}
             onChangeText={(text) => setFormData({ ...formData, date_of_event: text })}
             placeholder="YYYY-MM-DD"
+          />
+          <DateTimePickerComponent
+            label="Date of Event"
+            value={formData.date_of_event}
+            onDateChange={(date) => setFormData({ ...formData, date_of_event: date })}
+            placeholder="Select event date"
           />
 
           <Picker

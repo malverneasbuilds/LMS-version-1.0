@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
+import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -118,12 +119,18 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
             onChangeText={(text) => setFormData({ ...formData, date_received: text })}
             placeholder="YYYY-MM-DD"
           />
+          <DateTimePickerComponent
+            label="Date Received"
+            value={formData.date_received}
+            onDateChange={(date) => setFormData({ ...formData, date_received: date })}
+            placeholder="Select date received"
+          />
 
-          <TextField
+          <DateTimePickerComponent
             label="Expiry Date"
             value={formData.expiry_date}
-            onChangeText={(text) => setFormData({ ...formData, expiry_date: text })}
-            placeholder="YYYY-MM-DD"
+            onDateChange={(date) => setFormData({ ...formData, expiry_date: date })}
+            placeholder="Select expiry date"
           />
 
           {editRecord && (

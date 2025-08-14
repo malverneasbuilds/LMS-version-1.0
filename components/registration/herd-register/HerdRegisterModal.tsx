@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
+import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -103,6 +104,12 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
             value={formData.date_of_birth}
             onChangeText={(text) => setFormData({ ...formData, date_of_birth: text })}
             placeholder="YYYY-MM-DD"
+          />
+          <DateTimePickerComponent
+            label="Date of Birth"
+            value={formData.date_of_birth}
+            onDateChange={(date) => setFormData({ ...formData, date_of_birth: date })}
+            placeholder="Select date of birth"
           />
 
           <Picker

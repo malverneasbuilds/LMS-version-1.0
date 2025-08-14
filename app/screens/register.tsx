@@ -36,6 +36,7 @@ import { HealthRecordTable } from '../../components/registration/health-record/H
 import { HealthRecordModal } from '../../components/registration/health-record/HealthRecordModal';
 import { WeightRecordsTable } from '../../components/registration/weight-records/WeightRecordsTable';
 import { WeightRecordsModal } from '../../components/registration/weight-records/WeightRecordsModal';
+import { WeightHistoryModal } from '../../components/registration/weight-records/WeightHistoryModal';
 
 // Sample data for registers not yet connected to context
 const sampleData = {
@@ -111,6 +112,11 @@ function RegisterContent() {
   const [breedingSoundnessData, setBreedingSoundnessData] = useState(sampleData.breedingSoundness);
   const [feedInventoryData, setFeedInventoryData] = useState(sampleData.feedInventory);
   const [weightRecordsData, setWeightRecordsData] = useState(sampleData.weightRecords);
+  
+  // Weight Records specific states
+  const [weightHistoryModalVisible, setWeightHistoryModalVisible] = useState(false);
+  const [selectedAnimalForWeight, setSelectedAnimalForWeight] = useState('');
+  const [preselectedAnimalTag, setPreselectedAnimalTag] = useState('');
 
   // Helper function to calculate age from date of birth
   const calculateAge = (dateOfBirth: string): number => {
@@ -472,11 +478,24 @@ function RegisterContent() {
   // Weight Records handlers
   const handleAddWeightRecord = () => {
     setEditingWeightRecord(null);
+    setPreselectedAnimalTag('');
     setWeightRecordsModalVisible(true);
+  };
+
+  const handleAddWeightForAnimal = (animalTag: string) => {
+    setEditingWeightRecord(null);
+    setPreselectedAnimalTag(animalTag);
+    setWeightRecordsModalVisible(true);
+  };
+
+  const handleViewAllWeights = (animalTag: string) => {
+    setSelectedAnimalForWeight(animalTag);
+    setWeightHistoryModalVisible(true);
   };
 
   const handleEditWeightRecord = (record: any) => {
     setEditingWeightRecord(record);
+    setPreselectedAnimalTag('');
     setWeightRecordsModalVisible(true);
   };
 
@@ -686,6 +705,8 @@ function RegisterContent() {
             <WeightRecordsTable
               data={weightRecordsData}
               onAdd={handleAddWeightRecord}
+              onAddWeight={handleAddWeightForAnimal}
+              onViewAllWeights={handleViewAllWeights}
               onEdit={handleEditWeightRecord}
               onDelete={handleDeleteWeightRecord}
             />
@@ -694,6 +715,13 @@ function RegisterContent() {
               onClose={() => setWeightRecordsModalVisible(false)}
               onSave={handleSaveWeightRecord}
               editRecord={editingWeightRecord}
+              preselectedAnimalTag={preselectedAnimalTag}
+            />
+            <WeightHistoryModal
+              visible={weightHistoryModalVisible}
+              onClose={() => setWeightHistoryModalVisible(false)}
+              animalTag={selectedAnimalForWeight}
+              weightData={weightRecordsData}
             />
           </>
         );

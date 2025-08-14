@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
+import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -133,6 +134,12 @@ export function SalesRegisterModal({ visible, onClose, onSave, editRecord }: Sal
             value={formData.transaction_date}
             onChangeText={(text) => setFormData({ ...formData, transaction_date: text })}
             placeholder="YYYY-MM-DD"
+          />
+          <DateTimePickerComponent
+            label="Transaction Date"
+            value={formData.transaction_date}
+            onDateChange={(date) => setFormData({ ...formData, transaction_date: date })}
+            placeholder="Select transaction date"
           />
 
           <TextField
