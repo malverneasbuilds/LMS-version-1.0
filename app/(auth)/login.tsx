@@ -44,7 +44,7 @@ export default function LoginScreen() {
         />
         <View style={styles.overlay} />
         <Text variant="h1" weight="bold" color="white" style={styles.appName}>
-          Devor
+          LiveStock
         </Text>
         <Text variant="body" color="white" style={styles.appTagline}>
           Smart Livestock Management
@@ -56,7 +56,7 @@ export default function LoginScreen() {
           Welcome Back
         </Text>
         <Text variant="body" color="neutral.600" style={styles.subtitle}>
-          Sign in to continue managing your livestock
+          Login to continue managing your livestock
         </Text>
 
         <TextField
@@ -68,6 +68,7 @@ export default function LoginScreen() {
           autoCapitalize="none"
           startIcon={<Mail size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
+          error={error && email === '' ? 'Email is required' : ''}
         />
 
         <TextField
@@ -78,6 +79,7 @@ export default function LoginScreen() {
           isPassword
           startIcon={<KeyRound size={20} color={Colors.neutral[500]} />}
           containerStyle={styles.inputContainer}
+          error={error && password === '' ? 'Password is required' : ''}
         />
 
         {error && (
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logoContainer: {
-    height: 200,
+    height: 240,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -162,14 +164,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   loginButton: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   signupContainer: {
     flexDirection: 'row',
