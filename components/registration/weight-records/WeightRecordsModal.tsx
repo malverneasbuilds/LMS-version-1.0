@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
-import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -22,16 +21,9 @@ interface WeightRecordsModalProps {
   onClose: () => void;
   onSave: (record: Omit<WeightRecord, 'id'>) => void;
   editRecord?: WeightRecord | null;
-  preselectedAnimalTag?: string;
 }
 
-export function WeightRecordsModal({ 
-  visible, 
-  onClose, 
-  onSave, 
-  editRecord, 
-  preselectedAnimalTag 
-}: WeightRecordsModalProps) {
+export function WeightRecordsModal({ visible, onClose, onSave, editRecord }: WeightRecordsModalProps) {
   const { herdData } = useHerd();
   const [formData, setFormData] = useState({
     animal_tag: '',
@@ -53,14 +45,6 @@ export function WeightRecordsModal({
         weight: editRecord.weight,
         notes: editRecord.notes,
       });
-    } else if (preselectedAnimalTag) {
-      const today = new Date().toISOString().split('T')[0];
-      setFormData({
-        animal_tag: preselectedAnimalTag,
-        weight_date: today,
-        weight: 0,
-        notes: '',
-      });
     } else {
       setFormData({
         animal_tag: '',
@@ -69,7 +53,7 @@ export function WeightRecordsModal({
         notes: '',
       });
     }
-  }, [editRecord, visible, preselectedAnimalTag]);
+  }, [editRecord, visible]);
 
   const handleSave = () => {
     onSave(formData);
@@ -96,11 +80,11 @@ export function WeightRecordsModal({
             items={animalOptions}
           />
 
-          <DateTimePickerComponent
+          <TextField
             label="Weight Date"
             value={formData.weight_date}
-            onDateChange={(date) => setFormData({ ...formData, weight_date: date })}
-            placeholder="Select weight date"
+            onChangeText={(text) => setFormData({ ...formData, weight_date: text })}
+            placeholder="YYYY-MM-DD"
           />
 
           <TextField

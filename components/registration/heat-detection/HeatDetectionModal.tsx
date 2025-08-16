@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
-import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -179,12 +178,6 @@ export function HeatDetectionModal({ visible, onClose, onSave, editRecord }: Hea
             onChangeText={(text) => setFormData({ ...formData, heat_detection_date: text })}
             placeholder="YYYY-MM-DD"
           />
-          <DateTimePickerComponent
-            label="Heat Detection Date"
-            value={formData.heat_detection_date}
-            onDateChange={(date) => setFormData({ ...formData, heat_detection_date: date })}
-            placeholder="Select heat detection date"
-          />
 
           <TextField
             label="Observer"
@@ -198,12 +191,6 @@ export function HeatDetectionModal({ visible, onClose, onSave, editRecord }: Hea
             value={formData.serviced_date}
             onChangeText={(text) => setFormData({ ...formData, serviced_date: text })}
             placeholder="YYYY-MM-DD"
-          />
-          <DateTimePickerComponent
-            label="Serviced Date"
-            value={formData.serviced_date}
-            onDateChange={(date) => setFormData({ ...formData, serviced_date: date })}
-            placeholder="Select serviced date"
           />
 
           <Picker
@@ -249,18 +236,12 @@ export function HeatDetectionModal({ visible, onClose, onSave, editRecord }: Hea
             onChangeText={(text) => setFormData({ ...formData, return_to_heat_date_1: text })}
             placeholder="YYYY-MM-DD"
           />
-          <DateTimePickerComponent
-            label="Return to Heat Date 1"
-            value={formData.return_to_heat_date_1}
-            onDateChange={(date) => setFormData({ ...formData, return_to_heat_date_1: date })}
-            placeholder="Select return to heat date"
-          />
 
-          <DateTimePickerComponent
+          <TextField
             label="Date Served"
             value={formData.date_served}
-            onDateChange={(date) => setFormData({ ...formData, date_served: date })}
-            placeholder="Select date served"
+            onChangeText={(text) => setFormData({ ...formData, date_served: text })}
+            placeholder="YYYY-MM-DD"
           />
 
           <Picker
@@ -282,12 +263,6 @@ export function HeatDetectionModal({ visible, onClose, onSave, editRecord }: Hea
             value={formData.return_to_heat_date_2}
             onChangeText={(text) => setFormData({ ...formData, return_to_heat_date_2: text })}
             placeholder="YYYY-MM-DD"
-          />
-          <DateTimePickerComponent
-            label="Return to Heat Date 2"
-            value={formData.return_to_heat_date_2}
-            onDateChange={(date) => setFormData({ ...formData, return_to_heat_date_2: date })}
-            placeholder="Select return to heat date"
           />
         </ScrollView>
 

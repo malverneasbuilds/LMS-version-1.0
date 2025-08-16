@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
-import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Picker } from '../../inputs/Picker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
@@ -99,11 +98,11 @@ export function HealthRecordModal({ visible, onClose, onSave, editRecord }: Heal
         </View>
 
         <ScrollView style={styles.content}>
-          <DateTimePickerComponent
+          <TextField
             label="Date"
             value={formData.date}
-            onDateChange={(date) => setFormData({ ...formData, date: date })}
-            placeholder="Select date"
+            onChangeText={(text) => setFormData({ ...formData, date: text })}
+            placeholder="YYYY-MM-DD"
           />
 
           <Picker

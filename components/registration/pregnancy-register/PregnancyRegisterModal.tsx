@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
-import { DateTimePickerComponent } from '../../inputs/DateTimePicker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
@@ -108,32 +107,26 @@ export function PregnancyRegisterModal({ visible, onClose, onSave, editRecord }:
             onChangeText={(text) => setFormData({ ...formData, last_service_date: text })}
             placeholder="YYYY-MM-DD"
           />
-          <DateTimePickerComponent
-            label="Last Service Date"
-            value={formData.last_service_date}
-            onDateChange={(date) => setFormData({ ...formData, last_service_date: date })}
-            placeholder="Select last service date"
-          />
 
-          <DateTimePickerComponent
+          <TextField
             label="1PD (First Pregnancy Diagnosis)"
             value={formData.first_pd}
-            onDateChange={(date) => setFormData({ ...formData, first_pd: date })}
-            placeholder="Select first PD date"
+            onChangeText={(text) => setFormData({ ...formData, first_pd: text })}
+            placeholder="YYYY-MM-DD"
           />
 
-          <DateTimePickerComponent
+          <TextField
             label="2PD (Second Pregnancy Diagnosis)"
             value={formData.second_pd}
-            onDateChange={(date) => setFormData({ ...formData, second_pd: date })}
-            placeholder="Select second PD date"
+            onChangeText={(text) => setFormData({ ...formData, second_pd: text })}
+            placeholder="YYYY-MM-DD"
           />
 
-          <DateTimePickerComponent
+          <TextField
             label="3PD (Third Pregnancy Diagnosis)"
             value={formData.third_pd}
-            onDateChange={(date) => setFormData({ ...formData, third_pd: date })}
-            placeholder="Select third PD date"
+            onChangeText={(text) => setFormData({ ...formData, third_pd: text })}
+            placeholder="YYYY-MM-DD"
           />
 
           <TextField
@@ -150,18 +143,12 @@ export function PregnancyRegisterModal({ visible, onClose, onSave, editRecord }:
             onChangeText={(text) => setFormData({ ...formData, expected_calving_date: text })}
             placeholder="YYYY-MM-DD"
           />
-          <DateTimePickerComponent
-            label="Expected Calving Date"
-            value={formData.expected_calving_date}
-            onDateChange={(date) => setFormData({ ...formData, expected_calving_date: date })}
-            placeholder="Select expected calving date"
-          />
 
-          <DateTimePickerComponent
+          <TextField
             label="Actual Calving Date"
             value={formData.actual_calving_date}
-            onDateChange={(date) => setFormData({ ...formData, actual_calving_date: date })}
-            placeholder="Select actual calving date"
+            onChangeText={(text) => setFormData({ ...formData, actual_calving_date: text })}
+            placeholder="YYYY-MM-DD"
           />
         </ScrollView>
 
