@@ -104,8 +104,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.neutral[300],
-    borderRadius: 8,
+    borderRadius: 12,
     backgroundColor: Colors.white,
+    minHeight: 52,
   },
   focused: {
     borderColor: Colors.primary[500],

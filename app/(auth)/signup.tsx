@@ -49,7 +49,7 @@ export default function SignupScreen() {
 
       <View style={styles.formContainer}>
         <Text variant="h4" weight="bold" style={styles.title}>
-          Join LiveStock
+          Join Devor
         </Text>
         <Text variant="body" color="neutral.600" style={styles.subtitle}>
           Create your account to start managing your livestock

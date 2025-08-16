@@ -44,7 +44,7 @@ export default function LoginScreen() {
         />
         <View style={styles.overlay} />
         <Text variant="h1" weight="bold" color="white" style={styles.appName}>
-          LiveStock
+          Devor
         </Text>
         <Text variant="body" color="white" style={styles.appTagline}>
           Smart Livestock Management

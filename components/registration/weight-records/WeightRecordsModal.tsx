@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-nat
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
 import { Picker } from '../../inputs/Picker';
+import { DatePicker } from '../../inputs/DatePicker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
@@ -21,13 +22,20 @@ interface WeightRecordsModalProps {
   onClose: () => void;
   onSave: (record: Omit<WeightRecord, 'id'>) => void;
   editRecord?: WeightRecord | null;
+  preselectedAnimal?: string;
 }
 
-export function WeightRecordsModal({ visible, onClose, onSave, editRecord }: WeightRecordsModalProps) {
+export function WeightRecordsModal({ 
+  visible, 
+  onClose, 
+  onSave, 
+  editRecord, 
+  preselectedAnimal 
+}: WeightRecordsModalProps) {
   const { herdData } = useHerd();
   const [formData, setFormData] = useState({
     animal_tag: '',
-    weight_date: '',
+    weight_date: null as Date | null,
     weight: 0,
     notes: '',
   });
@@ -41,22 +49,33 @@ export function WeightRecordsModal({ visible, onClose, onSave, editRecord }: Wei
     if (editRecord) {
       setFormData({
         animal_tag: editRecord.animal_tag,
-        weight_date: editRecord.weight_date,
+        weight_date: new Date(editRecord.weight_date),
         weight: editRecord.weight,
         notes: editRecord.notes,
+      });
+    } else if (preselectedAnimal) {
+      setFormData({
+        animal_tag: preselectedAnimal,
+        weight_date: new Date(), // Default to today
+        weight: 0,
+        notes: '',
       });
     } else {
       setFormData({
         animal_tag: '',
-        weight_date: '',
+        weight_date: new Date(), // Default to today
         weight: 0,
         notes: '',
       });
     }
-  }, [editRecord, visible]);
+  }, [editRecord, visible, preselectedAnimal]);
 
   const handleSave = () => {
-    onSave(formData);
+    const recordToSave = {
+      ...formData,
+      weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
+    };
+    onSave(recordToSave);
     onClose();
   };
 
@@ -80,11 +99,11 @@ export function WeightRecordsModal({ visible, onClose, onSave, editRecord }: Wei
             items={animalOptions}
           />
 
-          <TextField
+          <DatePicker
             label="Weight Date"
             value={formData.weight_date}
-            onChangeText={(text) => setFormData({ ...formData, weight_date: text })}
-            placeholder="YYYY-MM-DD"
+            onDateChange={(date) => setFormData({ ...formData, weight_date: date })}
+            placeholder="Select weight date"
           />
 
           <TextField

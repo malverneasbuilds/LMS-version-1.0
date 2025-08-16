@@ -64,7 +64,7 @@ function ProfileContent() {
                 {user?.user_metadata?.name || 'User'}
               </Text>
               <Text variant="body" color="neutral.500">
-                Farm Owner
+                Devor Farm Manager
               </Text>
             </View>
           </View>

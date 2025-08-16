@@ -36,6 +36,7 @@ import { HealthRecordTable } from '../../components/registration/health-record/H
 import { HealthRecordModal } from '../../components/registration/health-record/HealthRecordModal';
 import { WeightRecordsTable } from '../../components/registration/weight-records/WeightRecordsTable';
 import { WeightRecordsModal } from '../../components/registration/weight-records/WeightRecordsModal';
+import { AnimalWeightHistoryModal } from '../../components/registration/weight-records/AnimalWeightHistoryModal';
 
 // Sample data for registers not yet connected to context
 const sampleData = {
@@ -91,6 +92,8 @@ function RegisterContent() {
   const [feedInventoryModalVisible, setFeedInventoryModalVisible] = useState(false);
   const [healthRecordModalVisible, setHealthRecordModalVisible] = useState(false);
   const [weightRecordsModalVisible, setWeightRecordsModalVisible] = useState(false);
+  const [weightHistoryModalVisible, setWeightHistoryModalVisible] = useState(false);
+  const [selectedAnimalForWeight, setSelectedAnimalForWeight] = useState<string>('');
   
   // Edit record states
   const [editingHerdRecord, setEditingHerdRecord] = useState(null);
@@ -472,9 +475,20 @@ function RegisterContent() {
   // Weight Records handlers
   const handleAddWeightRecord = () => {
     setEditingWeightRecord(null);
+    setSelectedAnimalForWeight('');
     setWeightRecordsModalVisible(true);
   };
 
+  const handleAddWeightForAnimal = (animalTag: string) => {
+    setEditingWeightRecord(null);
+    setSelectedAnimalForWeight(animalTag);
+    setWeightRecordsModalVisible(true);
+  };
+
+  const handleViewAnimalWeights = (animalTag: string) => {
+    setSelectedAnimalForWeight(animalTag);
+    setWeightHistoryModalVisible(true);
+  };
   const handleEditWeightRecord = (record: any) => {
     setEditingWeightRecord(record);
     setWeightRecordsModalVisible(true);

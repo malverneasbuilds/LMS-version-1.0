@@ -388,7 +388,7 @@ export default function HomeScreen() {
         </Card>
 
         <Text variant="h5" weight="bold" style={styles.sectionTitle}>
-          Quick Access
+          Devor
         </Text>
         
         <View style={styles.gridContainer}>

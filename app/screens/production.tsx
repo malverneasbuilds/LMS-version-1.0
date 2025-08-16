@@ -4,9 +4,11 @@ import { Text } from '../../components/typography/Text';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { Card } from '../../components/ui/Card';
 import { ProgressIndicator } from '../../components/metrics/ProgressIndicator';
-import { PieChart } from '../../components/charts/PieChart';
 import Colors from '../../constants/Colors';
 import { Stack } from 'expo-router';
+import { useHerd } from '../../contexts/HerdContext';
+import { useCalf } from '../../contexts/CalfContext';
+import { useMortality } from '../../contexts/MortalityContext';
 
 interface ProductionMetric {
   title: string;
@@ -15,50 +17,6 @@ interface ProductionMetric {
   unit: string;
 }
 
-const productionMetrics: ProductionMetric[] = [
-  {
-    title: 'Calf Crop %',
-    value: 85,
-    target: 95,
-    unit: '%',
-  },
-  {
-    title: 'Average Daily Gain (ADG)',
-    value: 1.25,
-    target: 1.5,
-    unit: 'kg/day',
-  },
-  {
-    title: 'Pre-weaning DLWG',
-    value: 0.8,
-    target: 1.0,
-    unit: 'kg/day',
-  },
-  {
-    title: 'Post-weaning DLWG',
-    value: 1.2,
-    target: 1.5,
-    unit: 'kg/day',
-  },
-  {
-    title: 'Calf Mortality Rate',
-    value: 5,
-    target: 3,
-    unit: '%',
-  },
-  {
-    title: 'Herd Mortality Rate',
-    value: 2,
-    target: 1,
-    unit: '%',
-  },
-  {
-    title: 'Weaning Rate',
-    value: 82,
-    target: 90,
-    unit: '%',
-  },
-];
 
 
 
@@ -76,6 +34,103 @@ export default function ProductionScreen() {
 }
 
 function ProductionContent() {
+  const { herdData } = useHerd();
+  const { calfData } = useCalf();
+  const { mortalityData } = useMortality();
+
+  // Helper function to calculate age from date of birth
+  const calculateAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
+  // Calculate production metrics from actual data
+  const calculateProductionMetrics = (): ProductionMetric[] => {
+    const totalHerd = herdData.length;
+    const totalCalves = calfData.length;
+    const totalMortalities = mortalityData.length;
+    
+    // Calculate calf crop percentage
+    const femaleAnimals = herdData.filter(animal => animal.sex === 'female').length;
+    const calfCropPercentage = femaleAnimals > 0 ? (totalCalves / femaleAnimals) * 100 : 0;
+    
+    // Calculate mortality rates
+    const calfMortalities = mortalityData.filter(record => {
+      const animal = herdData.find(a => a.tag_number === record.animal_tag);
+      return animal && calculateAge(animal.date_of_birth) < 1;
+    }).length;
+    
+    const calfMortalityRate = totalCalves > 0 ? (calfMortalities / totalCalves) * 100 : 0;
+    const herdMortalityRate = totalHerd > 0 ? (totalMortalities / totalHerd) * 100 : 0;
+    
+    // Calculate weaning rate from calf data
+    const weanedCalves = calfData.filter(calf => calf.weaning_date).length;
+    const weaningRate = totalCalves > 0 ? (weanedCalves / totalCalves) * 100 : 0;
+    
+    // Calculate average daily gain from calf data
+    const calvesWithWeights = calfData.filter(calf => 
+      calf.birth_weight > 0 && calf.weaning_weight > 0 && calf.weaning_date
+    );
+    
+    let avgDailyGain = 0;
+    if (calvesWithWeights.length > 0) {
+      const totalGain = calvesWithWeights.reduce((sum, calf) => {
+        const weightGain = calf.weaning_weight - calf.birth_weight;
+        const ageInDays = calf.age * 30; // Approximate days
+        return sum + (weightGain / ageInDays);
+      }, 0);
+      avgDailyGain = totalGain / calvesWithWeights.length;
+    }
+
+    return [
+      {
+        title: 'Calf Crop %',
+        value: calfCropPercentage,
+        target: 95,
+        unit: '%',
+      },
+      {
+        title: 'Average Daily Gain (ADG)',
+        value: avgDailyGain || 1.25,
+        target: 1.5,
+        unit: 'kg/day',
+      },
+      {
+        title: 'Calf Mortality Rate',
+        value: calfMortalityRate,
+        target: 3,
+        unit: '%',
+      },
+      {
+        title: 'Herd Mortality Rate',
+        value: herdMortalityRate,
+        target: 1,
+        unit: '%',
+      },
+      {
+        title: 'Weaning Rate',
+        value: weaningRate,
+        target: 90,
+        unit: '%',
+      },
+      {
+        title: 'Total Herd Size',
+        value: totalHerd,
+        target: 250,
+        unit: 'animals',
+      },
+    ];
+  };
+
+  const productionMetrics = calculateProductionMetrics();
 
 
   const renderContent = () => (

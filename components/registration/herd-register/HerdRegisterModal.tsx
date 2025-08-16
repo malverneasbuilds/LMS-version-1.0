@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-nat
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
 import { Picker } from '../../inputs/Picker';
+import { DatePicker } from '../../inputs/DatePicker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
@@ -44,7 +45,7 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
   const [formData, setFormData] = useState({
     tag_number: '',
     breed: '',
-    date_of_birth: '',
+    date_of_birth: null as Date | null,
     sex: '',
   });
 
@@ -53,21 +54,25 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
       setFormData({
         tag_number: editRecord.tag_number,
         breed: editRecord.breed,
-        date_of_birth: editRecord.date_of_birth,
+        date_of_birth: new Date(editRecord.date_of_birth),
         sex: editRecord.sex,
       });
     } else {
       setFormData({
         tag_number: '',
         breed: '',
-        date_of_birth: '',
+        date_of_birth: null,
         sex: '',
       });
     }
   }, [editRecord, visible]);
 
   const handleSave = () => {
-    onSave(formData);
+    const recordToSave = {
+      ...formData,
+      date_of_birth: formData.date_of_birth?.toISOString().split('T')[0] || '',
+    };
+    onSave(recordToSave);
     onClose();
   };
 
@@ -98,11 +103,11 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
             items={breedOptions}
           />
 
-          <TextField
+          <DatePicker
             label="Date of Birth"
             value={formData.date_of_birth}
-            onChangeText={(text) => setFormData({ ...formData, date_of_birth: text })}
-            placeholder="YYYY-MM-DD"
+            onDateChange={(date) => setFormData({ ...formData, date_of_birth: date })}
+            placeholder="Select date of birth"
           />
 
           <Picker
