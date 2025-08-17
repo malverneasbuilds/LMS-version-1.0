@@ -702,12 +702,25 @@ function RegisterContent() {
               onAdd={handleAddWeightRecord}
               onEdit={handleEditWeightRecord}
               onDelete={handleDeleteWeightRecord}
+              onAddWeight={handleAddWeightForAnimal}
+              onViewWeights={handleViewAnimalWeights}
             />
             <WeightRecordsModal
               visible={weightRecordsModalVisible}
               onClose={() => setWeightRecordsModalVisible(false)}
               onSave={handleSaveWeightRecord}
               editRecord={editingWeightRecord}
+              preselectedAnimal={selectedAnimalForWeight}
+            />
+            <AnimalWeightHistoryModal
+              visible={weightHistoryModalVisible}
+              onClose={() => setWeightHistoryModalVisible(false)}
+              animalTag={selectedAnimalForWeight}
+              weightRecords={weightRecordsData}
+              onAddWeight={() => {
+                setWeightHistoryModalVisible(false);
+                handleAddWeightForAnimal(selectedAnimalForWeight);
+              }}
             />
           </>
         );

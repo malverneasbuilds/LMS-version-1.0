@@ -28,6 +28,8 @@ interface WeightRecordsTableProps {
   onAdd: () => void;
   onEdit: (record: WeightRecord) => void;
   onDelete: (id: string) => void;
+  onAddWeight?: (animalTag: string) => void;
+  onViewWeights?: (animalTag: string) => void;
   onAddWeight: (animalTag: string) => void;
   onViewWeights: (animalTag: string) => void;
 }

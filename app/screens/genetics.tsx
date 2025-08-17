@@ -8,6 +8,15 @@ import { PieChart } from '../../components/charts/PieChart';
 import { ProgressIndicator } from '../../components/metrics/ProgressIndicator';
 import Colors from '../../constants/Colors';
 import { Stack } from 'expo-router';
+import { 
+  calculateConceptionRate, 
+  calculateCalvingPercentage, 
+  calculateCalvingInterval,
+  calculate42DayInCalfRate,
+  calculate100DayInCalfRate 
+} from '../../utils/calculations';
+import { useHerd } from '../../contexts/HerdContext';
+import { useCalf } from '../../contexts/CalfContext';
 
 const breedingHerdData = [
   {
@@ -77,6 +86,15 @@ export default function GeneticsScreen() {
 
 function GeneticsContent(): JSX.Element {
   const [activeTab, setActiveTab] = useState('herds');
+  const { herdData } = useHerd();
+  const { calfData } = useCalf();
+  
+  // Mock pregnancy data - in real app this would come from pregnancy context
+  const mockPregnancyData = [
+    { last_service_date: '2024-01-15', first_pd: '2024-02-20', second_pd: '2024-03-25' },
+    { last_service_date: '2024-02-10', first_pd: '2024-03-15', second_pd: '2024-04-20' },
+    { last_service_date: '2024-03-05', first_pd: '2024-04-10', second_pd: '2024-05-15' },
+  ];
 
   const renderBreedingHerds = () => (
     <>
@@ -152,45 +170,47 @@ function GeneticsContent(): JSX.Element {
       <View style={styles.statsContainer}>
         <View style={styles.statRow}>
           <Text variant="body" weight="medium">
+            Conception Rate:
+          </Text>
+          <Text variant="body" color="success.500">
+            {calculateConceptionRate(herdData, mockPregnancyData).toFixed(1)}%
+          </Text>
+        </View>
+        <View style={styles.statRow}>
+          <Text variant="body" weight="medium">
+            42-Day In-Calf Rate:
+          </Text>
+          <Text variant="body" color="primary.500">
+            {calculate42DayInCalfRate(mockPregnancyData).toFixed(1)}%
+          </Text>
+        </View>
+        <View style={styles.statRow}>
+          <Text variant="body" weight="medium">
+            100-Day In-Calf Rate:
+          </Text>
+          <Text variant="body" color="primary.500">
+            {calculate100DayInCalfRate(mockPregnancyData).toFixed(1)}%
+          </Text>
+        </View>
+        <View style={styles.statRow}>
+          <Text variant="body" weight="medium">
             Total Served:
           </Text>
-          <Text variant="body">120</Text>
+          <Text variant="body">{mockPregnancyData.length}</Text>
         </View>
         <View style={styles.statRow}>
           <Text variant="body" weight="medium">
             Total Incalf:
           </Text>
-          <Text variant="body">98</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text variant="body" weight="medium">
-            Conception Rate:
-          </Text>
-          <Text variant="body" color="success.500">
-            82%
-          </Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text variant="body" weight="medium">
-            42-Day Incalf Rate:
-          </Text>
-          <Text variant="body" color="primary.500">
-            65%
-          </Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text variant="body" weight="medium">
-            100-Day Incalf Rate:
-          </Text>
-          <Text variant="body" color="primary.500">
-            78%
-          </Text>
+          <Text variant="body">{mockPregnancyData.filter(p => p.first_pd).length}</Text>
         </View>
         <View style={styles.statRow}>
           <Text variant="body" weight="medium">
             Trimester PDs:
           </Text>
-          <Text variant="body">45 | 32 | 21</Text>
+          <Text variant="body">
+            {mockPregnancyData.filter(p => p.first_pd).length} | {mockPregnancyData.filter(p => p.second_pd).length} | 0
+          </Text>
         </View>
       </View>
     </Card>
@@ -206,14 +226,14 @@ function GeneticsContent(): JSX.Element {
           <Text variant="body" weight="medium">
             Calving Interval:
           </Text>
-          <Text variant="body">415 days</Text>
+          <Text variant="body">{calculateCalvingInterval(mockPregnancyData).toFixed(0)} days</Text>
         </View>
         <View style={styles.statRow}>
           <Text variant="body" weight="medium">
-            Calving Rate:
+            Calving Percentage:
           </Text>
           <Text variant="body" color="success.500">
-            88%
+            {calculateCalvingPercentage(herdData, calfData).toFixed(1)}%
           </Text>
         </View>
         <View style={styles.statRow}>
@@ -221,7 +241,7 @@ function GeneticsContent(): JSX.Element {
             Calf Mortality:
           </Text>
           <Text variant="body" color="error.500">
-            6%
+            {((calfData.length > 0 ? 2 / calfData.length : 0) * 100).toFixed(1)}%
           </Text>
         </View>
       </View>

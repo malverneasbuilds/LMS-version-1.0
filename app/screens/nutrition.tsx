@@ -10,6 +10,13 @@ import Colors from '../../constants/Colors';
 import { Stack } from 'expo-router';
 import { useHerd } from '../../contexts/HerdContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
+import { 
+  calculateDLWG, 
+  calculateADG, 
+  calculateFCR, 
+  calculateAverageBCS,
+  getPerformanceColor 
+} from '../../utils/calculations';
 
 interface NutritionMetric {
   id: string;
@@ -80,88 +87,67 @@ export default function NutritionScreen() {
 function NutritionContent() {
   const { herdData } = useHerd();
   const { healthRecordData } = useHealthRecord();
+  
+  // Mock weight records data - in real app this would come from weight records context
+  const mockWeightRecords = [
+    { weight_date: '2024-01-01', weight: 450 },
+    { weight_date: '2024-06-01', weight: 520 },
+  ];
 
-  // Calculate Weight Gain Matrix from actual data
+  // Calculate nutrition metrics from actual data
   const calculateWeightGainMatrix = (): NutritionMetric[] => {
-    // This would need weight records data to calculate DLWG
-    // For now, using sample calculation
-    const avgDailyGain = 0.8; // This should be calculated from weight records
-    const targetDailyGain = 1.0;
+    const dlwg = calculateDLWG(mockWeightRecords);
+    const adg = calculateADG(calfData);
+    const avgBCS = calculateAverageBCS(healthRecordData);
+    const fcr = calculateFCR(2500, 150); // Mock feed consumed vs weight gain
     
     return [
       {
         id: '1',
-        category: 'Weight Gain Matrix (DLWG)',
-        result: `${avgDailyGain} kg/day`,
-        target: `${targetDailyGain} kg/day`,
-        status: avgDailyGain >= targetDailyGain ? 'pass' : 'warning',
+        category: 'Daily Live Weight Gain (DLWG)',
+        result: `${dlwg.toFixed(2)} kg/day`,
+        target: '1.0 kg/day',
+        status: dlwg >= 1.0 ? 'pass' : dlwg >= 0.7 ? 'warning' : 'fail',
       },
       {
         id: '2',
         category: 'Average Daily Gain (ADG)',
-        result: `${avgDailyGain} kg/day`,
-        target: `${targetDailyGain} kg/day`,
-        status: avgDailyGain >= targetDailyGain ? 'pass' : 'warning',
+        result: `${adg.toFixed(2)} kg/day`,
+        target: '1.2 kg/day',
+        status: adg >= 1.2 ? 'pass' : adg >= 0.8 ? 'warning' : 'fail',
+      },
+      {
+        id: '3',
+        category: 'Feed Conversion Ratio (FCR)',
+        result: fcr.toFixed(2),
+        target: '6.0',
+        status: fcr <= 6.0 ? 'pass' : fcr <= 8.0 ? 'warning' : 'fail',
+      },
+      {
+        id: '4',
+        category: 'Body Condition Score (BCS)',
+        result: avgBCS.toFixed(1),
+        target: '3.0-3.5',
+        status: avgBCS >= 3.0 && avgBCS <= 3.5 ? 'pass' : 'warning',
+      },
+      {
+        id: '5',
+        category: 'Herd Size',
+        result: herdData.length.toString(),
+        target: 'Variable',
+        status: 'pass',
+      },
+      {
+        id: '6',
+        category: 'Health Records',
+        result: healthRecordData.length.toString(),
+        target: 'Regular monitoring',
+        status: healthRecordData.length > 0 ? 'pass' : 'warning',
       },
     ];
   };
 
-  // Calculate Body Condition Score from health records
-  const calculateBCS = (): number => {
-    // Extract BCS from health records where available
-    const bcsRecords = healthRecordData.filter(record => 
-      record.diagnosis?.toLowerCase().includes('bcs') || 
-      record.diagnosis?.toLowerCase().includes('body condition')
-    );
-    
-    if (bcsRecords.length > 0) {
-      // Extract numeric BCS values and average them
-      const bcsValues = bcsRecords
-        .map(record => {
-          const match = record.diagnosis?.match(/(\d+\.?\d*)/);
-          return match ? parseFloat(match[1]) : null;
-        })
-        .filter(val => val !== null && val >= 1 && val <= 5);
-      
-      if (bcsValues.length > 0) {
-        return bcsValues.reduce((sum, val) => sum + val!, 0) / bcsValues.length;
-      }
-    }
-    
-    return 3.5; // Default value
-  };
-
-  const nutritionMetrics: NutritionMetric[] = [
-    ...calculateWeightGainMatrix(),
-    {
-      id: '3',
-      category: 'Body Condition Score',
-      result: calculateBCS().toFixed(1),
-      target: '3.0-3.5',
-      status: 'pass',
-    },
-    {
-      id: '4',
-      category: 'Herd Size',
-      result: herdData.length.toString(),
-      target: 'Variable',
-      status: 'pass',
-    },
-    {
-      id: '5',
-      category: 'Health Records',
-      result: healthRecordData.length.toString(),
-      target: 'Regular monitoring',
-      status: healthRecordData.length > 0 ? 'pass' : 'warning',
-    },
-    {
-      id: '6',
-      category: 'Nutritional Management',
-      result: 'Structured',
-      target: 'Structured',
-      status: 'pass',
-    },
-  ];
+  const nutritionMetrics = calculateNutritionMetrics();
   return (
     <ScreenContainer style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>

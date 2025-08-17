@@ -5,11 +5,12 @@ import { useAuth } from './AuthContext';
 export interface DrugRecord {
   id: string;
   drug_name: string;
+  drug_type: string;
   expiry_date: string;
-  quantity: string;
-  date_received: string;
-  unit_cost: number;
-  withdrawal_period: string;
+  pregnancy_safety: string;
+  in_stock: boolean;
+  cost: number;
+  withdrawal_period: number;
   created_at: string;
   updated_at: string;
 }

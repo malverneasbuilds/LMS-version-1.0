@@ -32,6 +32,8 @@ export function CalfRegisterTable({ data, onAdd, onEdit, onDelete }: CalfRegiste
     { key: 'birth_weight', title: 'Birth Wt', width: 100 },
     { key: 'weaning_weight', title: 'Wean Wt', width: 100 },
     { key: 'weaning_date', title: 'Wean Date', width: 120 },
+    { key: 'observer', title: 'Observer', width: 100 },
+    { key: 'delivery_type', title: 'Delivery', width: 100 },
     {
       key: 'actions',
       title: 'Actions',

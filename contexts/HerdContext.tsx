@@ -8,6 +8,8 @@ export interface HerdRecord {
   breed: string;
   date_of_birth: string;
   sex: string;
+  stock_type?: string;
+  source?: string;
   created_at: string;
   updated_at: string;
 }

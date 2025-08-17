@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import { removeAnimalFromHerdRegister } from '../utils/animalRules';
 
 export interface MortalityRecord {
   id: string;
@@ -74,6 +75,9 @@ export function MortalityProvider({ children }: { children: React.ReactNode }) {
         console.error('Error adding mortality record:', error);
         throw error;
       }
+      
+      // Automatically remove animal from herd register
+      await removeAnimalFromHerdRegister(record.animal_tag, user.id);
       
       await fetchData();
     } catch (err) {

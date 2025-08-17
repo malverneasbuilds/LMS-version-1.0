@@ -9,6 +9,13 @@ import { Stack } from 'expo-router';
 import { useHerd } from '../../contexts/HerdContext';
 import { useCalf } from '../../contexts/CalfContext';
 import { useMortality } from '../../contexts/MortalityContext';
+import { 
+  calculateCalfCropPercentage, 
+  calculateMortalityRate, 
+  calculateWeaningRate,
+  calculateADG,
+  getPerformanceColor 
+} from '../../utils/calculations';
 
 interface ProductionMetric {
   title: string;
@@ -58,37 +65,18 @@ function ProductionContent() {
     const totalCalves = calfData.length;
     const totalMortalities = mortalityData.length;
     
-    // Calculate calf crop percentage
-    const femaleAnimals = herdData.filter(animal => animal.sex === 'female').length;
-    const calfCropPercentage = femaleAnimals > 0 ? (totalCalves / femaleAnimals) * 100 : 0;
+    // Use calculation utilities
+    const calfCropPercentage = calculateCalfCropPercentage(herdData, calfData);
+    const avgDailyGain = calculateADG(calfData);
+    const mortalityRate = calculateMortalityRate(herdData, mortalityData);
+    const weaningRate = calculateWeaningRate(calfData);
     
-    // Calculate mortality rates
     const calfMortalities = mortalityData.filter(record => {
       const animal = herdData.find(a => a.tag_number === record.animal_tag);
       return animal && calculateAge(animal.date_of_birth) < 1;
     }).length;
     
     const calfMortalityRate = totalCalves > 0 ? (calfMortalities / totalCalves) * 100 : 0;
-    const herdMortalityRate = totalHerd > 0 ? (totalMortalities / totalHerd) * 100 : 0;
-    
-    // Calculate weaning rate from calf data
-    const weanedCalves = calfData.filter(calf => calf.weaning_date).length;
-    const weaningRate = totalCalves > 0 ? (weanedCalves / totalCalves) * 100 : 0;
-    
-    // Calculate average daily gain from calf data
-    const calvesWithWeights = calfData.filter(calf => 
-      calf.birth_weight > 0 && calf.weaning_weight > 0 && calf.weaning_date
-    );
-    
-    let avgDailyGain = 0;
-    if (calvesWithWeights.length > 0) {
-      const totalGain = calvesWithWeights.reduce((sum, calf) => {
-        const weightGain = calf.weaning_weight - calf.birth_weight;
-        const ageInDays = calf.age * 30; // Approximate days
-        return sum + (weightGain / ageInDays);
-      }, 0);
-      avgDailyGain = totalGain / calvesWithWeights.length;
-    }
 
     return [
       {
@@ -99,7 +87,7 @@ function ProductionContent() {
       },
       {
         title: 'Average Daily Gain (ADG)',
-        value: avgDailyGain || 1.25,
+        value: avgDailyGain || 0.8,
         target: 1.5,
         unit: 'kg/day',
       },
@@ -111,7 +99,7 @@ function ProductionContent() {
       },
       {
         title: 'Herd Mortality Rate',
-        value: herdMortalityRate,
+        value: mortalityRate,
         target: 1,
         unit: '%',
       },
@@ -160,18 +148,8 @@ interface ProductionMetricCardProps {
 function ProductionMetricCard({ metric }: ProductionMetricCardProps) {
   // Determine if the metric is good, warning, or bad
   const getColor = () => {
-    // For mortality rates, lower is better
-    if (metric.title.includes('Mortality')) {
-      if (metric.value > metric.target * 1.5) return Colors.error[500];
-      if (metric.value > metric.target) return Colors.warning[500];
-      return Colors.success[500];
-    }
-    
-    // For all other metrics, higher is better
-    const percentage = (metric.value / metric.target) * 100;
-    if (percentage < 70) return Colors.error[500];
-    if (percentage < 90) return Colors.warning[500];
-    return Colors.success[500];
+    const isInverse = metric.title.includes('Mortality');
+    return getPerformanceColor(metric.value, metric.target, isInverse);
   };
 
   // Calculate percentage of target

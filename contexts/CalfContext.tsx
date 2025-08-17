@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import { addCalfToHerdRegister } from '../utils/animalRules';
 
 export interface CalfRecord {
   id: string;
@@ -11,6 +12,8 @@ export interface CalfRecord {
   birth_weight: number;
   weaning_weight: number;
   weaning_date: string;
+  observer?: string;
+  delivery_type?: string;
   created_at: string;
   updated_at: string;
 }
@@ -74,6 +77,9 @@ export function CalfProvider({ children }: { children: React.ReactNode }) {
         console.error('Error adding calf record:', error);
         throw error;
       }
+      
+      // Automatically add calf to herd register
+      await addCalfToHerdRegister(record, user.id);
       
       await fetchData();
     } catch (err) {

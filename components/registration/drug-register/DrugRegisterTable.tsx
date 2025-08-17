@@ -10,11 +10,12 @@ import Colors from '../../../constants/Colors';
 interface DrugRecord {
   id: string;
   drug_name: string;
+  drug_type: string;
   expiry_date: string;
-  quantity: string;
-  date_received: string;
-  unit_cost: string;
-  withdrawal_period: string;
+  pregnancy_safety: string;
+  in_stock: boolean;
+  cost: number;
+  withdrawal_period: number;
 }
 
 interface DrugRegisterTableProps {
@@ -27,11 +28,35 @@ interface DrugRegisterTableProps {
 export function DrugRegisterTable({ data, onAdd, onEdit, onDelete }: DrugRegisterTableProps) {
   const columns = [
     { key: 'drug_name', title: 'Drug Name', width: 140 },
+    { key: 'drug_type', title: 'Drug Type', width: 120 },
     { key: 'expiry_date', title: 'Expiry', width: 100 },
-    { key: 'quantity', title: 'Quantity', width: 80 },
-    { key: 'date_received', title: 'Received', width: 100 },
-    { key: 'unit_cost', title: 'Unit Cost', width: 100 },
-    { key: 'withdrawal_period', title: 'Withdrawal', width: 100 },
+    { key: 'pregnancy_safety', title: 'Pregnancy Safety', width: 140 },
+    { 
+      key: 'in_stock', 
+      title: 'In Stock', 
+      width: 80,
+      render: (value: boolean) => (
+        <Text variant="caption" color={value ? 'success.600' : 'error.600'}>
+          {value ? 'Yes' : 'No'}
+        </Text>
+      )
+    },
+    { 
+      key: 'cost', 
+      title: 'Cost ($)', 
+      width: 100,
+      render: (value: number) => (
+        <Text variant="caption">${value.toFixed(2)}</Text>
+      )
+    },
+    { 
+      key: 'withdrawal_period', 
+      title: 'Withdrawal (days)', 
+      width: 140,
+      render: (value: number) => (
+        <Text variant="caption">{value} days</Text>
+      )
+    },
     {
       key: 'actions',
       title: 'Actions',

@@ -30,6 +30,12 @@ const sexOptions = [
   { label: 'Female', value: 'female' },
 ];
 
+const deliveryTypeOptions = [
+  { label: 'Normal', value: 'normal' },
+  { label: 'Assisted', value: 'assisted' },
+  { label: 'C-section', value: 'c_section' },
+];
+
 export function CalfRegisterModal({ visible, onClose, onSave, editRecord }: CalfRegisterModalProps) {
   const { herdData } = useHerd();
   const [formData, setFormData] = useState({
@@ -39,6 +45,8 @@ export function CalfRegisterModal({ visible, onClose, onSave, editRecord }: Calf
     birth_weight: 0,
     weaning_weight: 0,
     weaning_date: '',
+    observer: '',
+    delivery_type: '',
   });
 
   // Create options for parent animals (only females for calves)
@@ -58,6 +66,8 @@ export function CalfRegisterModal({ visible, onClose, onSave, editRecord }: Calf
         birth_weight: editRecord.birth_weight,
         weaning_weight: editRecord.weaning_weight,
         weaning_date: editRecord.weaning_date,
+        observer: editRecord.observer || '',
+        delivery_type: editRecord.delivery_type || '',
       });
     } else {
       setFormData({
@@ -67,6 +77,8 @@ export function CalfRegisterModal({ visible, onClose, onSave, editRecord }: Calf
         birth_weight: 0,
         weaning_weight: 0,
         weaning_date: '',
+        observer: '',
+        delivery_type: '',
       });
     }
   }, [editRecord, visible]);
@@ -141,6 +153,20 @@ export function CalfRegisterModal({ visible, onClose, onSave, editRecord }: Calf
             value={formData.weaning_date}
             onChangeText={(text) => setFormData({ ...formData, weaning_date: text })}
             placeholder="YYYY-MM-DD"
+          />
+
+          <TextField
+            label="Observer"
+            value={formData.observer}
+            onChangeText={(text) => setFormData({ ...formData, observer: text })}
+            placeholder="Enter observer name"
+          />
+
+          <Picker
+            label="Delivery Type"
+            value={formData.delivery_type}
+            onValueChange={(value) => setFormData({ ...formData, delivery_type: value })}
+            items={deliveryTypeOptions}
           />
         </ScrollView>
 

@@ -40,6 +40,8 @@ export function HerdRegisterTable({ data, onAdd, onEdit, onDelete }: HerdRegiste
   const columns = [
     { key: 'tag_number', title: 'Tag #', width: 100 },
     { key: 'breed', title: 'Breed', width: 100 },
+    { key: 'stock_type', title: 'Stock Type', width: 100 },
+    { key: 'source', title: 'Source', width: 120 },
     { 
       key: 'date_of_birth', 
       title: 'Age', 

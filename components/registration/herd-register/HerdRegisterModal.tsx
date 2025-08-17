@@ -35,10 +35,17 @@ const sexOptions = [
   { label: 'Female', value: 'female' },
 ];
 
-const statusOptions = [
-  { label: 'Active', value: 'active' },
-  { label: 'Sold', value: 'sold' },
-  { label: 'Deceased', value: 'deceased' },
+const stockTypeOptions = [
+  { label: 'Bull', value: 'bull' },
+  { label: 'Heifer', value: 'heifer' },
+  { label: 'Cow', value: 'cow' },
+  { label: 'Steer', value: 'steer' },
+];
+
+const sourceOptions = [
+  { label: 'Purchased', value: 'purchased' },
+  { label: 'Born on Farm', value: 'born_on_farm' },
+  { label: 'Unknown', value: 'unknown' },
 ];
 
 export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: HerdRegisterModalProps) {
@@ -47,6 +54,8 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
     breed: '',
     date_of_birth: null as Date | null,
     sex: '',
+    stock_type: '',
+    source: 'unknown',
   });
 
   useEffect(() => {
@@ -56,6 +65,8 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
         breed: editRecord.breed,
         date_of_birth: new Date(editRecord.date_of_birth),
         sex: editRecord.sex,
+        stock_type: editRecord.stock_type || '',
+        source: editRecord.source || 'unknown',
       });
     } else {
       setFormData({
@@ -63,6 +74,8 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
         breed: '',
         date_of_birth: null,
         sex: '',
+        stock_type: '',
+        source: 'unknown',
       });
     }
   }, [editRecord, visible]);
@@ -115,6 +128,20 @@ export function HerdRegisterModal({ visible, onClose, onSave, editRecord }: Herd
             value={formData.sex}
             onValueChange={(value) => setFormData({ ...formData, sex: value })}
             items={sexOptions}
+          />
+
+          <Picker
+            label="Stock Type"
+            value={formData.stock_type}
+            onValueChange={(value) => setFormData({ ...formData, stock_type: value })}
+            items={stockTypeOptions}
+          />
+
+          <Picker
+            label="Source"
+            value={formData.source}
+            onValueChange={(value) => setFormData({ ...formData, source: value })}
+            items={sourceOptions}
           />
         </ScrollView>
 
