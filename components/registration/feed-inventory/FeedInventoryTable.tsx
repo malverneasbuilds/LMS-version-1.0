@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '../../typography/Text';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
-import { Plus, CreditCard as Edit, Trash2, TrendingDown, AlertTriangle, Eye } from 'lucide-react-native';
+import { Plus, CreditCard as Edit, Trash2, TrendingDown, TriangleAlert as AlertTriangle, Eye } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 import { useFeedInventory, FeedInventoryRecord } from '../../../contexts/FeedInventoryContext';
 import { FeedConsumptionModal } from './FeedConsumptionModal';
