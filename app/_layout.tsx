@@ -8,6 +8,7 @@ import { DrugProvider } from '../contexts/DrugContext';
 import { MortalityProvider } from '../contexts/MortalityContext';
 import { SalesProvider } from '../contexts/SalesContext';
 import { HealthRecordProvider } from '../contexts/HealthRecordContext';
+import { FeedInventoryProvider } from '../contexts/FeedInventoryContext';
 import Colors from '../constants/Colors';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
@@ -30,6 +31,7 @@ export default function RootLayout() {
             <MortalityProvider>
               <SalesProvider>
                 <HealthRecordProvider>
+                  <FeedInventoryProvider>
             <Stack
               screenOptions={{
                 headerTitleStyle: {
@@ -72,6 +74,7 @@ export default function RootLayout() {
             </Stack>
             <StatusBar style="dark" />
 
+                  </FeedInventoryProvider>
                 </HealthRecordProvider>
               </SalesProvider>
             </MortalityProvider>

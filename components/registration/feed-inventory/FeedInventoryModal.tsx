@@ -3,24 +3,16 @@ import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-nat
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
 import { Picker } from '../../inputs/Picker';
+import { DatePicker } from '../../inputs/DatePicker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
-
-interface FeedInventoryRecord {
-  id: string;
-  feed_type: string;
-  brand: string;
-  date_received: string;
-  expiry_date: string;
-  current_stock: number;
-  total_price: number;
-}
+import { FeedInventoryRecord } from '../../../contexts/FeedInventoryContext';
 
 interface FeedInventoryModalProps {
   visible: boolean;
   onClose: () => void;
-  onSave: (record: Omit<FeedInventoryRecord, 'id'>) => void;
+  onSave: (record: Omit<FeedInventoryRecord, 'id' | 'created_at' | 'updated_at'>) => void;
   editRecord?: FeedInventoryRecord | null;
 }
 
@@ -32,18 +24,46 @@ const feedTypeOptions = [
   { label: 'Silage', value: 'silage' },
   { label: 'Concentrates', value: 'concentrates' },
   { label: 'Minerals', value: 'minerals' },
+  { label: 'Salt', value: 'salt' },
   { label: 'Supplements', value: 'supplements' },
+  { label: 'Molasses', value: 'molasses' },
+  { label: 'Bran', value: 'bran' },
+  { label: 'Maize', value: 'maize' },
+];
+
+const categoryOptions = [
+  { label: 'Concentrate', value: 'concentrate' },
+  { label: 'Roughage', value: 'roughage' },
+  { label: 'Supplement', value: 'supplement' },
+  { label: 'Mineral', value: 'mineral' },
+  { label: 'Medication', value: 'medication' },
+  { label: 'Other', value: 'other' },
+];
+
+const unitOptions = [
+  { label: 'Kilograms (kg)', value: 'kg' },
+  { label: 'Bags', value: 'bags' },
+  { label: 'Liters', value: 'liters' },
+  { label: 'Tons', value: 'tons' },
+  { label: 'Pounds', value: 'pounds' },
 ];
 
 export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: FeedInventoryModalProps) {
   const [formData, setFormData] = useState({
     feed_type: '',
     brand: '',
-    date_received: '',
-    expiry_date: '',
-    quantity_to_add: 0, // New quantity to add to current stock
+    category: '',
+    unit: 'kg',
+    initial_stock: 0,
     current_stock: 0,
+    cost_per_unit: 0,
     total_price: 0,
+    supplier: '',
+    batch_number: '',
+    storage_location: '',
+    minimum_stock_level: 0,
+    date_received: null as Date | null,
+    expiry_date: null as Date | null,
   });
 
   useEffect(() => {
@@ -51,36 +71,60 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
       setFormData({
         feed_type: editRecord.feed_type,
         brand: editRecord.brand,
-        date_received: editRecord.date_received,
-        expiry_date: editRecord.expiry_date,
-        quantity_to_add: 0,
+        category: editRecord.category,
+        unit: editRecord.unit,
+        initial_stock: editRecord.initial_stock,
         current_stock: editRecord.current_stock,
+        cost_per_unit: editRecord.cost_per_unit,
         total_price: editRecord.total_price,
+        supplier: editRecord.supplier,
+        batch_number: editRecord.batch_number,
+        storage_location: editRecord.storage_location,
+        minimum_stock_level: editRecord.minimum_stock_level,
+        date_received: new Date(editRecord.date_received),
+        expiry_date: new Date(editRecord.expiry_date),
       });
     } else {
       setFormData({
         feed_type: '',
         brand: '',
-        date_received: '',
-        expiry_date: '',
-        quantity_to_add: 0,
+        category: '',
+        unit: 'kg',
+        initial_stock: 0,
         current_stock: 0,
+        cost_per_unit: 0,
         total_price: 0,
+        supplier: '',
+        batch_number: '',
+        storage_location: '',
+        minimum_stock_level: 0,
+        date_received: new Date(),
+        expiry_date: null,
       });
     }
   }, [editRecord, visible]);
 
+  // Auto-calculate total price when initial stock or cost per unit changes
+  useEffect(() => {
+    const calculatedTotal = formData.initial_stock * formData.cost_per_unit;
+    if (calculatedTotal !== formData.total_price) {
+      setFormData(prev => ({ ...prev, total_price: calculatedTotal }));
+    }
+  }, [formData.initial_stock, formData.cost_per_unit]);
+
+  // Set current stock to initial stock for new records
+  useEffect(() => {
+    if (!editRecord && formData.initial_stock !== formData.current_stock) {
+      setFormData(prev => ({ ...prev, current_stock: prev.initial_stock }));
+    }
+  }, [formData.initial_stock, editRecord]);
+
   const handleSave = () => {
-    // Add the new quantity to current stock
-    const finalRecord = {
+    const recordToSave = {
       ...formData,
-      current_stock: editRecord 
-        ? formData.current_stock + formData.quantity_to_add 
-        : formData.quantity_to_add,
+      date_received: formData.date_received?.toISOString().split('T')[0] || '',
+      expiry_date: formData.expiry_date?.toISOString().split('T')[0] || '',
     };
-    
-    // Remove the temporary quantity_to_add field
-    const { quantity_to_add, ...recordToSave } = finalRecord;
     onSave(recordToSave);
     onClose();
   };
@@ -112,42 +156,94 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
             placeholder="Enter brand name"
           />
 
-          <TextField
-            label="Date Received"
-            value={formData.date_received}
-            onChangeText={(text) => setFormData({ ...formData, date_received: text })}
-            placeholder="YYYY-MM-DD"
+          <Picker
+            label="Category"
+            value={formData.category}
+            onValueChange={(value) => setFormData({ ...formData, category: value })}
+            items={categoryOptions}
+          />
+
+          <Picker
+            label="Unit of Measurement"
+            value={formData.unit}
+            onValueChange={(value) => setFormData({ ...formData, unit: value })}
+            items={unitOptions}
           />
 
           <TextField
-            label="Expiry Date"
-            value={formData.expiry_date}
-            onChangeText={(text) => setFormData({ ...formData, expiry_date: text })}
-            placeholder="YYYY-MM-DD"
+            label={`Initial Stock (${formData.unit})`}
+            value={formData.initial_stock.toString()}
+            onChangeText={(text) => setFormData({ ...formData, initial_stock: parseFloat(text) || 0 })}
+            placeholder="Enter initial stock quantity"
+            keyboardType="numeric"
           />
 
           {editRecord && (
             <View style={styles.stockInfo}>
               <Text variant="body2" color="neutral.600">
-                Current Stock: {formData.current_stock} kg
+                Current Stock: {formData.current_stock} {formData.unit}
               </Text>
             </View>
           )}
 
           <TextField
-            label={editRecord ? "Quantity to Add (kg)" : "Initial Stock (kg)"}
-            value={formData.quantity_to_add.toString()}
-            onChangeText={(text) => setFormData({ ...formData, quantity_to_add: parseFloat(text) || 0 })}
-            placeholder={editRecord ? "Enter quantity to add" : "Enter initial stock"}
+            label={`Cost per ${formData.unit} ($)`}
+            value={formData.cost_per_unit.toString()}
+            onChangeText={(text) => setFormData({ ...formData, cost_per_unit: parseFloat(text) || 0 })}
+            placeholder="Enter cost per unit"
             keyboardType="numeric"
           />
 
           <TextField
             label="Total Price ($)"
-            value={formData.total_price.toString()}
+            value={formData.total_price.toFixed(2)}
             onChangeText={(text) => setFormData({ ...formData, total_price: parseFloat(text) || 0 })}
-            placeholder="Enter total price"
+            placeholder="Auto-calculated"
             keyboardType="numeric"
+            editable={false}
+          />
+
+          <TextField
+            label="Supplier"
+            value={formData.supplier}
+            onChangeText={(text) => setFormData({ ...formData, supplier: text })}
+            placeholder="Enter supplier name"
+          />
+
+          <TextField
+            label="Batch Number"
+            value={formData.batch_number}
+            onChangeText={(text) => setFormData({ ...formData, batch_number: text })}
+            placeholder="Enter batch number"
+          />
+
+          <TextField
+            label="Storage Location"
+            value={formData.storage_location}
+            onChangeText={(text) => setFormData({ ...formData, storage_location: text })}
+            placeholder="Enter storage location"
+          />
+
+          <TextField
+            label={`Minimum Stock Level (${formData.unit})`}
+            value={formData.minimum_stock_level.toString()}
+            onChangeText={(text) => setFormData({ ...formData, minimum_stock_level: parseFloat(text) || 0 })}
+            placeholder="Enter minimum stock alert level"
+            keyboardType="numeric"
+          />
+
+          <DatePicker
+            label="Date Received"
+            value={formData.date_received}
+            onDateChange={(date) => setFormData({ ...formData, date_received: date })}
+            placeholder="Select date received"
+          />
+
+          <DatePicker
+            label="Expiry Date"
+            value={formData.expiry_date}
+            onDateChange={(date) => setFormData({ ...formData, expiry_date: date })}
+            placeholder="Select expiry date"
           />
         </ScrollView>
 

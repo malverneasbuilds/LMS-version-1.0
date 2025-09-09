@@ -12,6 +12,7 @@ import { useDrug } from '../../contexts/DrugContext';
 import { useMortality } from '../../contexts/MortalityContext';
 import { useSales } from '../../contexts/SalesContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
+import { useFeedInventory } from '../../contexts/FeedInventoryContext';
 
 // Import all the table components
 import { HerdRegisterTable } from '../../components/registration/herd-register/HerdRegisterTable';
@@ -77,6 +78,7 @@ function RegisterContent() {
   const { mortalityData, addRecord: addMortalityRecord, updateRecord: updateMortalityRecord, deleteRecord: deleteMortalityRecord } = useMortality();
   const { salesData, addRecord: addSalesRecord, updateRecord: updateSalesRecord, deleteRecord: deleteSalesRecord } = useSales();
   const { healthRecordData, addRecord: addHealthRecord, updateRecord: updateHealthRecord, deleteRecord: deleteHealthRecord } = useHealthRecord();
+  const { feedInventoryData, addInventoryRecord: addFeedRecord, updateInventoryRecord: updateFeedRecord, deleteInventoryRecord: deleteFeedRecord } = useFeedInventory();
   
   const [activeTab, setActiveTab] = useState('herd');
   
@@ -107,12 +109,11 @@ function RegisterContent() {
   const [editingFeedInventoryRecord, setEditingFeedInventoryRecord] = useState(null);
   const [editingHealthRecord, setEditingHealthRecord] = useState(null);
   const [editingWeightRecord, setEditingWeightRecord] = useState(null);
-  
-  // Data states
+
+  // Data states for registers not yet connected to contexts
   const [heatDetectionData, setHeatDetectionData] = useState(sampleData.heatDetection);
   const [pregnancyData, setPregnancyData] = useState(sampleData.pregnancy);
   const [breedingSoundnessData, setBreedingSoundnessData] = useState(sampleData.breedingSoundness);
-  const [feedInventoryData, setFeedInventoryData] = useState(sampleData.feedInventory);
   const [weightRecordsData, setWeightRecordsData] = useState(sampleData.weightRecords);
 
   // Helper function to calculate age from date of birth
@@ -441,11 +442,9 @@ function RegisterContent() {
 
   const handleSaveFeedInventory = (record: any) => {
     if (editingFeedInventoryRecord) {
-      setFeedInventoryData(feedInventoryData.map(item => 
-        item.id === editingFeedInventoryRecord.id ? { ...record, id: editingFeedInventoryRecord.id } : item
-      ));
+      updateFeedRecord(editingFeedInventoryRecord.id, record);
     } else {
-      setFeedInventoryData([...feedInventoryData, { ...record, id: Date.now().toString() }]);
+      addFeedRecord(record);
     }
   };
 

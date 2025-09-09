@@ -10,6 +10,7 @@ import Colors from '../../constants/Colors';
 import { Stack } from 'expo-router';
 import { useHerd } from '../../contexts/HerdContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
+import { useCalf } from '../../contexts/CalfContext';
 import { 
   calculateDLWG, 
   calculateADG, 
@@ -87,6 +88,7 @@ export default function NutritionScreen() {
 function NutritionContent() {
   const { herdData } = useHerd();
   const { healthRecordData } = useHealthRecord();
+  const { calfData } = useCalf();
   
   // Mock weight records data - in real app this would come from weight records context
   const mockWeightRecords = [
@@ -95,7 +97,7 @@ function NutritionContent() {
   ];
 
   // Calculate nutrition metrics from actual data
-  const calculateWeightGainMatrix = (): NutritionMetric[] => {
+  const calculateNutritionMetrics = (): NutritionMetric[] => {
     const dlwg = calculateDLWG(mockWeightRecords);
     const adg = calculateADG(calfData);
     const avgBCS = calculateAverageBCS(healthRecordData);
