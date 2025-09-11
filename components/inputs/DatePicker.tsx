@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform, TextInput } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar } from 'lucide-react-native';
 import { Text } from '../typography/Text';
@@ -34,9 +34,23 @@ export function DatePicker({
     }
   };
 
+  const handleWebDateChange = (dateString: string) => {
+    if (dateString) {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        onDateChange(date);
+      }
+    }
+  };
+
   const formatDate = (date: Date | null) => {
-    if (!date) return placeholder;
+    if (!date) return '';
     return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  };
+
+  const formatDisplayDate = (date: Date | null) => {
+    if (!date) return placeholder;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -47,25 +61,42 @@ export function DatePicker({
         </Text>
       )}
       
-      <TouchableOpacity
-        style={[
-          styles.inputContainer,
-          error && styles.error,
-        ]}
-        onPress={() => setShowPicker(true)}
-      >
-        <View style={styles.iconContainer}>
-          <Calendar size={20} color={Colors.neutral[500]} />
+      {Platform.OS === 'web' ? (
+        // Web-specific date input
+        <View style={[styles.inputContainer, error && styles.error]}>
+          <View style={styles.iconContainer}>
+            <Calendar size={20} color={Colors.neutral[500]} />
+          </View>
+          <TextInput
+            style={styles.webDateInput}
+            value={formatDate(value)}
+            onChangeText={handleWebDateChange}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={Colors.neutral[400]}
+          />
         </View>
-        <Text 
+      ) : (
+        // Native date picker
+        <TouchableOpacity
           style={[
-            styles.dateText,
-            !value && styles.placeholderText
+            styles.inputContainer,
+            error && styles.error,
           ]}
+          onPress={() => setShowPicker(true)}
         >
-          {formatDate(value)}
-        </Text>
-      </TouchableOpacity>
+          <View style={styles.iconContainer}>
+            <Calendar size={20} color={Colors.neutral[500]} />
+          </View>
+          <Text 
+            style={[
+              styles.dateText,
+              !value && styles.placeholderText
+            ]}
+          >
+            {formatDisplayDate(value)}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {error && (
         <Text variant="caption" color="error.500" style={styles.errorText}>
@@ -73,7 +104,7 @@ export function DatePicker({
         </Text>
       )}
 
-      {showPicker && (
+      {showPicker && Platform.OS !== 'web' && (
         <DateTimePicker
           value={value || new Date()}
           mode="date"
@@ -116,6 +147,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.neutral[800],
     paddingRight: 16,
+  },
+  webDateInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.neutral[800],
+    paddingRight: 16,
+    paddingVertical: 16,
+    outline: 'none',
+    border: 'none',
+    backgroundColor: 'transparent',
   },
   placeholderText: {
     color: Colors.neutral[400],
