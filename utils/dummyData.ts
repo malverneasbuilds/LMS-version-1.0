@@ -307,6 +307,121 @@ export const generateHealthData = (userId: string, herdData: any[], count: numbe
   return healthData;
 };
 
+// Generate feed inventory dummy data
+export const generateFeedInventoryData = (userId: string, count: number = 12) => {
+  const feedInventoryData = [];
+  const feedTypes = [
+    'dairy_meal', 'beef_fattener', 'calf_starter', 'hay', 'silage', 
+    'concentrates', 'minerals', 'salt', 'supplements', 'molasses', 'bran', 'maize'
+  ];
+  const brands = ['ProFeed', 'NutriMax', 'FarmBest', 'LivestockPlus', 'AgriNutrition', 'FeedMaster'];
+  const categories = ['concentrate', 'roughage', 'supplement', 'mineral', 'medication', 'other'];
+  const units = ['kg', 'bags', 'liters', 'tons'];
+  const suppliers = ['Feed Supply Co.', 'Agricultural Supplies Ltd', 'Farm Direct', 'Livestock Nutrition Inc'];
+  const storageLocations = ['Barn A', 'Barn B', 'Storage Shed', 'Feed Room', 'Silo 1', 'Silo 2'];
+  
+  for (let i = 0; i < count; i++) {
+    const feedType = feedTypes[i];
+    const brand = getRandomElement(brands);
+    const category = getRandomElement(categories);
+    const unit = getRandomElement(units);
+    const supplier = getRandomElement(suppliers);
+    const storageLocation = getRandomElement(storageLocations);
+    
+    // Generate realistic stock amounts based on feed type
+    const initialStock = unit === 'tons' ? getRandomDecimal(1, 5) : 
+                        unit === 'bags' ? getRandomNumber(10, 100) :
+                        unit === 'liters' ? getRandomNumber(100, 1000) :
+                        getRandomNumber(50, 500); // kg
+    
+    // Current stock should be less than initial (some consumption)
+    const consumptionPercentage = getRandomDecimal(0.1, 0.7); // 10-70% consumed
+    const currentStock = initialStock * (1 - consumptionPercentage);
+    
+    const costPerUnit = unit === 'tons' ? getRandomDecimal(800, 1500) :
+                       unit === 'bags' ? getRandomDecimal(25, 80) :
+                       unit === 'liters' ? getRandomDecimal(2, 8) :
+                       getRandomDecimal(1.5, 5); // per kg
+    
+    const totalPrice = initialStock * costPerUnit;
+    const minimumStockLevel = initialStock * 0.2; // 20% of initial stock
+    
+    // Generate dates
+    const dateReceived = getRandomDate(
+      new Date(Date.now() - 180 * 24 * 60 * 60 * 1000), // 6 months ago
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)   // 1 month ago
+    );
+    
+    // Expiry date 6 months to 2 years from date received
+    const expiryDate = new Date(dateReceived);
+    expiryDate.setMonth(expiryDate.getMonth() + getRandomNumber(6, 24));
+    
+    feedInventoryData.push({
+      user_id: userId,
+      feed_type: feedType,
+      brand,
+      category,
+      unit,
+      initial_stock: initialStock,
+      current_stock: currentStock,
+      cost_per_unit: costPerUnit,
+      total_price: totalPrice,
+      supplier,
+      batch_number: `BATCH-${getRandomNumber(1000, 9999)}`,
+      storage_location: storageLocation,
+      minimum_stock_level: minimumStockLevel,
+      date_received: dateReceived,
+      expiry_date: expiryDate.toISOString().split('T')[0],
+    });
+  }
+  
+  return feedInventoryData;
+};
+
+// Generate feed consumption records dummy data
+export const generateFeedConsumptionData = (userId: string, feedInventoryData: any[], count: number = 50) => {
+  const consumptionData = [];
+  const consumptionTypes = ['daily_feeding', 'monthly_update', 'adjustment', 'waste'];
+  const recordedBy = ['Farm Manager', 'John Smith', 'Mary Johnson', 'Feed Supervisor'];
+  
+  feedInventoryData.forEach(feedItem => {
+    // Generate 2-5 consumption records per feed item
+    const numRecords = getRandomNumber(2, 5);
+    let remainingStock = feedItem.initial_stock;
+    
+    for (let i = 0; i < numRecords; i++) {
+      // Generate consumption date between date received and now
+      const startDate = new Date(feedItem.date_received);
+      startDate.setDate(startDate.getDate() + (i * 30)); // Monthly intervals
+      
+      const consumptionDate = getRandomDate(
+        startDate,
+        new Date(Math.min(startDate.getTime() + 30 * 24 * 60 * 60 * 1000, Date.now()))
+      );
+      
+      // Calculate consumption amount (10-30% of remaining stock)
+      const consumptionPercentage = getRandomDecimal(0.1, 0.3);
+      const amountConsumed = remainingStock * consumptionPercentage;
+      remainingStock = Math.max(0, remainingStock - amountConsumed);
+      
+      const consumptionType = i === numRecords - 1 ? 'monthly_update' : getRandomElement(consumptionTypes);
+      const recorder = getRandomElement(recordedBy);
+      
+      consumptionData.push({
+        user_id: userId,
+        feed_inventory_id: feedItem.id, // This will need to be updated after insertion
+        consumption_date: consumptionDate,
+        amount_consumed: amountConsumed,
+        remaining_stock: remainingStock,
+        consumption_type: consumptionType,
+        notes: `${consumptionType.replace('_', ' ')} - ${amountConsumed.toFixed(1)} ${feedItem.unit} consumed`,
+        recorded_by: recorder,
+      });
+    }
+  });
+  
+  return consumptionData.slice(0, count);
+};
 // Main function to populate all dummy data
 export const populateDummyData = async (userId: string) => {
   try {
@@ -381,6 +496,27 @@ export const populateDummyData = async (userId: string) => {
     
     if (healthError) {
       console.error('Error inserting health data:', healthError);
+    }
+    
+    // Generate and insert feed inventory data
+    const feedInventoryData = generateFeedInventoryData(userId, 12);
+    const { data: insertedFeedData, error: feedError } = await supabase
+      .from('feed_inventory')
+      .insert(feedInventoryData)
+      .select('*');
+    
+    if (feedError) {
+      console.error('Error inserting feed inventory data:', feedError);
+    } else if (insertedFeedData) {
+      // Generate consumption records with actual feed inventory IDs
+      const consumptionData = generateFeedConsumptionData(userId, insertedFeedData, 50);
+      const { error: consumptionError } = await supabase
+        .from('feed_consumption_records')
+        .insert(consumptionData);
+      
+      if (consumptionError) {
+        console.error('Error inserting feed consumption data:', consumptionError);
+      }
     }
     
     console.log('Dummy data generated successfully!');
