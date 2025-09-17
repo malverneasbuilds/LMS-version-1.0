@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Modal, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
 import { Picker } from '../../inputs/Picker';
@@ -232,19 +232,43 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
             keyboardType="numeric"
           />
 
-          <DatePicker
-            label="Date Received"
-            value={formData.date_received}
-            onDateChange={(date) => setFormData({ ...formData, date_received: date })}
-            placeholder="Select date received"
-          />
+          {Platform.OS === 'web' ? (
+            <TextField
+              label="Date Received"
+              value={formData.date_received ? formData.date_received.toISOString().split('T')[0] : ''}
+              onChangeText={(text) => {
+                const date = text ? new Date(text) : null;
+                setFormData({ ...formData, date_received: date });
+              }}
+              placeholder="YYYY-MM-DD"
+            />
+          ) : (
+            <DatePicker
+              label="Date Received"
+              value={formData.date_received}
+              onDateChange={(date) => setFormData({ ...formData, date_received: date })}
+              placeholder="Select date received"
+            />
+          )}
 
-          <DatePicker
-            label="Expiry Date"
-            value={formData.expiry_date}
-            onDateChange={(date) => setFormData({ ...formData, expiry_date: date })}
-            placeholder="Select expiry date"
-          />
+          {Platform.OS === 'web' ? (
+            <TextField
+              label="Expiry Date"
+              value={formData.expiry_date ? formData.expiry_date.toISOString().split('T')[0] : ''}
+              onChangeText={(text) => {
+                const date = text ? new Date(text) : null;
+                setFormData({ ...formData, expiry_date: date });
+              }}
+              placeholder="YYYY-MM-DD"
+            />
+          ) : (
+            <DatePicker
+              label="Expiry Date"
+              value={formData.expiry_date}
+              onDateChange={(date) => setFormData({ ...formData, expiry_date: date })}
+              placeholder="Select expiry date"
+            />
+          )}
         </ScrollView>
 
         <View style={styles.footer}>
