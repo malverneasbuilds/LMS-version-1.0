@@ -6,6 +6,7 @@ import { DataTable } from '../../tables/DataTable';
 import { Button } from '../../ui/Button';
 import { Plus, CreditCard as Edit, Trash2 } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
+import { Picker } from '@/components/inputs/Picker';
 
 interface DrugRecord {
   id: string;
