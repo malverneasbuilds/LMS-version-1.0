@@ -5,6 +5,7 @@ import { TextField } from '../../inputs/TextField';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
+import { Picker } from '@/components/inputs/Picker';
 
 interface DrugRecord {
   id: string;
