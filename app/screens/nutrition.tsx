@@ -11,10 +11,10 @@ import { Stack } from 'expo-router';
 import { useHerd } from '../../contexts/HerdContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
 import { useCalf } from '../../contexts/CalfContext';
+import { useFeedInventory } from '../../contexts/FeedInventoryContext';
 import { 
   calculateDLWG, 
   calculateADG, 
-  calculateFCR, 
   calculateAverageBCS,
   getPerformanceColor 
 } from '../../utils/calculations';
@@ -89,6 +89,7 @@ function NutritionContent() {
   const { herdData } = useHerd();
   const { healthRecordData } = useHealthRecord();
   const { calfData } = useCalf();
+  const { feedConsumptionData } = useFeedInventory();
   
   // Mock weight records data - in real app this would come from weight records context
   const mockWeightRecords = [
@@ -121,7 +122,7 @@ function NutritionContent() {
       {
         id: '3',
         category: 'Feed Conversion Ratio (FCR)',
-        result: fcr.toFixed(2),
+        result: `${fcr.toFixed(2)} (${totalFeedConsumed.toFixed(0)}kg feed / ${totalWeightGain.toFixed(0)}kg gain)`,
         target: '6.0',
         status: fcr <= 6.0 ? 'pass' : fcr <= 8.0 ? 'warning' : 'fail',
       },
