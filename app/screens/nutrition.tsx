@@ -16,7 +16,8 @@ import {
   calculateDLWG, 
   calculateADG, 
   calculateAverageBCS,
-  getPerformanceColor 
+  getPerformanceColor,
+  calculateFCR
 } from '../../utils/calculations';
 
 interface NutritionMetric {
