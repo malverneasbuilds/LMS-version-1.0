@@ -8,6 +8,7 @@ import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 import { useHerd } from '../../../contexts/HerdContext';
+import { Plus, Eye, Scale } from 'lucide-react-native';
 
 interface WeightRecord {
   id: string;
