@@ -3,7 +3,7 @@ import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-nat
 import { Text } from '../../typography/Text';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
-import { X, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
+import { X, TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 
 interface WeightRecord {
