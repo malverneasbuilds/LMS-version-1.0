@@ -232,16 +232,20 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
             keyboardType="numeric"
           />
 
+          {/* Date Received */}
           {Platform.OS === 'web' ? (
-            <TextField
-              label="Date Received"
-              value={formData.date_received ? formData.date_received.toISOString().split('T')[0] : ''}
-              onChangeText={(text) => {
-                const date = text ? new Date(text) : null;
-                setFormData({ ...formData, date_received: date });
-              }}
-              placeholder="YYYY-MM-DD"
-            />
+            <View style={{ marginBottom: 16 }}>
+              <Text variant="body2" style={{ marginBottom: 6 }}>Date Received</Text>
+              <input
+                type="date"
+                value={formData.date_received ? formData.date_received.toISOString().split('T')[0] : ''}
+                onChange={(e) => {
+                  const date = e.target.value ? new Date(e.target.value) : null;
+                  setFormData({ ...formData, date_received: date });
+                }}
+                style={styles.webDateInput}
+              />
+            </View>
           ) : (
             <DatePicker
               label="Date Received"
@@ -251,16 +255,20 @@ export function FeedInventoryModal({ visible, onClose, onSave, editRecord }: Fee
             />
           )}
 
+          {/* Expiry Date */}
           {Platform.OS === 'web' ? (
-            <TextField
-              label="Expiry Date"
-              value={formData.expiry_date ? formData.expiry_date.toISOString().split('T')[0] : ''}
-              onChangeText={(text) => {
-                const date = text ? new Date(text) : null;
-                setFormData({ ...formData, expiry_date: date });
-              }}
-              placeholder="YYYY-MM-DD"
-            />
+            <View style={{ marginBottom: 16 }}>
+              <Text variant="body2" style={{ marginBottom: 6 }}>Expiry Date</Text>
+              <input
+                type="date"
+                value={formData.expiry_date ? formData.expiry_date.toISOString().split('T')[0] : ''}
+                onChange={(e) => {
+                  const date = e.target.value ? new Date(e.target.value) : null;
+                  setFormData({ ...formData, expiry_date: date });
+                }}
+                style={styles.webDateInput}
+              />
+            </View>
           ) : (
             <DatePicker
               label="Expiry Date"
@@ -319,5 +327,12 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+  },
+  webDateInput: {
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.neutral[300],
+    width: "100%",
   },
 });
