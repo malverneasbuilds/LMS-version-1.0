@@ -142,10 +142,10 @@ function NutritionContent() {
       },
       {
         id: '6',
-        category: 'Health Records',
-        result: healthRecordData.length.toString(),
-        target: 'Regular monitoring',
-        status: healthRecordData.length > 0 ? 'pass' : 'warning',
+        category: 'Feed Consumption Tracking',
+        result: `${feedConsumptionData.length} records`,
+        target: 'Monthly tracking',
+        status: feedConsumptionData.length > 0 ? 'pass' : 'warning',
       },
     ];
   };
