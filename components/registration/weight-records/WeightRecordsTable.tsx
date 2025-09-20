@@ -6,7 +6,6 @@ import { Button } from '../../ui/Button';
 import { Plus, Eye, Scale } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 import { useHerd } from '../../../contexts/HerdContext';
-import { useWeightRecords } from '../../../contexts/WeightRecordsContext';
 
 interface WeightRecord {
   id: string;
@@ -63,7 +62,7 @@ export function WeightRecordsTable({
   const getAnimalWeightSummary = (): AnimalWeightSummary[] => {
     return herdData.map(animal => {
       // Find the most recent weight record for this animal
-      const animalWeights = data
+      const animalWeights = weightRecordsData
         .filter(record => record.animal_tag === animal.tag_number)
         .sort((a, b) => new Date(b.weight_date).getTime() - new Date(a.weight_date).getTime());
       

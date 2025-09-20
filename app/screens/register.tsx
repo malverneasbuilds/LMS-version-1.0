@@ -715,7 +715,6 @@ function RegisterContent() {
               visible={weightHistoryModalVisible}
               onClose={() => setWeightHistoryModalVisible(false)}
               animalTag={selectedAnimalForWeight}
-              weightRecords={weightRecordsData}
               onAddWeight={() => {
                 setWeightHistoryModalVisible(false);
                 handleAddWeightForAnimal(selectedAnimalForWeight);

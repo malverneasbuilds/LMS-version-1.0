@@ -42,9 +42,6 @@ export const calculateADG = (calfData: CalfRecord[]): number => {
 };
 
 // Calculate Feed Conversion Ratio (FCR)
-export const calculateFCR = (feedConsumed: number, weightGain: number): number => {
-  return weightGain > 0 ? feedConsumed / weightGain : 0;
-};
 
 // Calculate Body Condition Score (BCS) average
 export const calculateAverageBCS = (healthRecords: HealthRecord[]): number => {
