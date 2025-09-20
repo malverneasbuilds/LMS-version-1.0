@@ -123,9 +123,9 @@ function NutritionContent() {
       {
         id: '3',
         category: 'Feed Conversion Ratio (FCR)',
-        result: `${fcr.toFixed(2)} (${fcr.toFixed(0)}kg feed / ${totalWeightGain.toFixed(0)}kg gain)`,
+        result: `${fcrData.ratio.toFixed(2)} (${fcrData.feedConsumed.toFixed(0)}kg feed / ${fcrData.weightGain.toFixed(0)}kg gain)`,
         target: '6.0',
-        status: fcr <= 6.0 ? 'pass' : fcr <= 8.0 ? 'warning' : 'fail',
+        status: fcrData.ratio <= 6.0 ? 'pass' : fcrData.ratio <= 8.0 ? 'warning' : 'fail',
       },
       {
         id: '4',
