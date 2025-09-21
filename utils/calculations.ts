@@ -4,24 +4,46 @@ import { MortalityRecord } from '../contexts/MortalityContext';
 import { HealthRecord } from '../contexts/HealthRecordContext';
 
 // Calculate Daily Live Weight Gain (DLWG)
-export const calculateDLWG = (weightRecords: any[]): number => {
+export const calculateDLWG = (weightRecords: { animal_tag: string; weight_date: string; weight: number }[]): number => {
   if (weightRecords.length < 2) return 0;
   
-  // Sort by date
-  const sortedRecords = weightRecords.sort((a, b) => 
-    new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime()
-  );
+  // Group records by animal
+  const animalWeights: { [key: string]: typeof weightRecords } = {};
+  weightRecords.forEach(record => {
+    if (!animalWeights[record.animal_tag]) {
+      animalWeights[record.animal_tag] = [];
+    }
+    animalWeights[record.animal_tag].push(record);
+  });
   
-  const firstRecord = sortedRecords[0];
-  const lastRecord = sortedRecords[sortedRecords.length - 1];
+  let totalDLWG = 0;
+  let animalCount = 0;
   
-  const weightGain = lastRecord.weight - firstRecord.weight;
-  const daysDiff = Math.abs(
-    (new Date(lastRecord.weight_date).getTime() - new Date(firstRecord.weight_date).getTime()) 
-    / (1000 * 60 * 60 * 24)
-  );
+  // Calculate DLWG for each animal and average them
+  Object.values(animalWeights).forEach(records => {
+    if (records.length >= 2) {
+      // Sort by date
+      const sortedRecords = records.sort((a, b) => 
+        new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime()
+      );
+      
+      const firstRecord = sortedRecords[0];
+      const lastRecord = sortedRecords[sortedRecords.length - 1];
+      
+      const weightGain = lastRecord.weight - firstRecord.weight;
+      const daysDiff = Math.abs(
+        (new Date(lastRecord.weight_date).getTime() - new Date(firstRecord.weight_date).getTime()) 
+        / (1000 * 60 * 60 * 24)
+      );
+      
+      if (daysDiff > 0 && weightGain > 0) {
+        totalDLWG += weightGain / daysDiff;
+        animalCount++;
+      }
+    }
+  });
   
-  return daysDiff > 0 ? weightGain / daysDiff : 0;
+  return animalCount > 0 ? totalDLWG / animalCount : 0;
 };
 
 // Calculate Average Daily Gain (ADG)
