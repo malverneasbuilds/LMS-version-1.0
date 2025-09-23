@@ -5,6 +5,7 @@ import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { X, TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
+import { useWeightRecords } from '../../../contexts/WeightRecordsContext';
 
 interface WeightRecord {
   id: string;
@@ -30,8 +31,10 @@ export function AnimalWeightHistoryModal({
 }: AnimalWeightHistoryModalProps) {
   const { weightRecordsData } = useWeightRecords();
 
+  const { weightRecordsData } = useWeightRecords();
+
   // Sort records by date (newest first)
-  const sortedRecords = weightRecordsData
+  const sortedRecords = (weightRecordsData || [])
     .filter(record => record.animal_tag === animalTag)
     .sort((a, b) => new Date(b.weight_date).getTime() - new Date(a.weight_date).getTime());
 
