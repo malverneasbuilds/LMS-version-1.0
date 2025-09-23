@@ -6,6 +6,7 @@ import { Button } from '../../ui/Button';
 import { Plus, Eye, Scale } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 import { useHerd } from '../../../contexts/HerdContext';
+import { useWeightRecords } from '../../../contexts/WeightRecordsContext';
 
 interface WeightRecord {
   id: string;
@@ -43,6 +44,7 @@ export function WeightRecordsTable({
   onViewWeights 
 }: WeightRecordsTableProps) {
   const { herdData } = useHerd();
+  const { weightRecordsData } = useWeightRecords();
 
   // Helper function to calculate age from date of birth
   const calculateAge = (dateOfBirth: string): number => {
