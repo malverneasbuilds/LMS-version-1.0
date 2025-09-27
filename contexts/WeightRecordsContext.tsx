@@ -8,6 +8,8 @@ export interface WeightRecord {
   weight_date: string;
   weight: number;
   feed_consumed: number;
+  body_condition_score: number;
+  feed_consumed: number;
   notes: string;
   created_at: string;
   updated_at: string;
