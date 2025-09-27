@@ -112,7 +112,7 @@ export function WeightRecordsTable({
               Current Weight
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.fcrCell]}>
-              FCR
+              Feed Conversion Ratio
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.dateCell]}>
               Last Recorded
