@@ -4,22 +4,27 @@ import { ChevronDown } from 'lucide-react-native';
 import { Text } from '../typography/Text';
 import Colors from '../../constants/Colors';
 
-interface PickerItem {
+interface BCSPickerProps {
   label: string;
-  value: string;
-}
-
-interface PickerProps {
-  label: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  items: PickerItem[];
+  value: number;
+  onValueChange: (value: number) => void;
   style?: any;
 }
 
-export function Picker({ label, value, onValueChange, items = [], style }: PickerProps) {
+export function BCSPicker({ label, value, onValueChange, style }: BCSPickerProps) {
   const [modalVisible, setModalVisible] = useState(false);
-  const selectedItem = items.find(item => item.value === value);
+
+  // Generate BCS options from 1.0 to 5.0 with 0.25 increments
+  const bcsOptions = [];
+  for (let i = 1.0; i <= 5.0; i += 0.25) {
+    const roundedValue = Math.round(i * 4) / 4; // Ensure precise 0.25 increments
+    bcsOptions.push({
+      label: roundedValue.toFixed(2),
+      value: roundedValue,
+    });
+  }
+
+  const selectedOption = bcsOptions.find(option => option.value === value);
 
   return (
     <View style={[styles.container, style]}>
@@ -31,7 +36,9 @@ export function Picker({ label, value, onValueChange, items = [], style }: Picke
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}
       >
-        <Text style={styles.selectedText}>{selectedItem?.label || 'Select...'}</Text>
+        <Text style={styles.selectedText}>
+          {selectedOption?.label || '3.00'}
+        </Text>
         <ChevronDown size={20} color={Colors.neutral[400]} />
       </TouchableOpacity>
 
@@ -53,24 +60,28 @@ export function Picker({ label, value, onValueChange, items = [], style }: Picke
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.optionsContainer}>
-              {items.map((item, index) => (
+              {bcsOptions.map((option, index) => (
                 <TouchableOpacity
-                  key={item.value}
+                  key={option.value}
                   style={[
                     styles.option,
-                    index === items.length - 1 && styles.lastOption,
-                    item.value === value && styles.selectedOption
+                    index === bcsOptions.length - 1 && styles.lastOption,
+                    option.value === value && styles.selectedOption
                   ]}
                   onPress={() => {
-                    onValueChange(item.value);
+                    onValueChange(option.value);
                     setModalVisible(false);
                   }}
                 >
                   <Text
                     variant="body"
-                    color={item.value === value ? 'primary.500' : 'neutral.900'}
+                    color={option.value === value ? 'primary.500' : 'neutral.900'}
+                    weight={option.value === value ? 'medium' : 'regular'}
                   >
-                    {item.label}
+                    {option.label}
+                  </Text>
+                  <Text variant="caption" color="neutral.500" style={styles.description}>
+                    {getBCSDescription(option.value)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -80,6 +91,15 @@ export function Picker({ label, value, onValueChange, items = [], style }: Picke
       </Modal>
     </View>
   );
+}
+
+// Helper function to get BCS description
+function getBCSDescription(score: number): string {
+  if (score <= 1.5) return 'Very thin - ribs easily visible';
+  if (score <= 2.5) return 'Thin - ribs easily felt';
+  if (score <= 3.5) return 'Moderate - ideal condition';
+  if (score <= 4.5) return 'Fat - ribs hard to feel';
+  return 'Very fat - obese condition';
 }
 
 const styles = StyleSheet.create({
@@ -143,5 +163,8 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: Colors.primary[50],
+  },
+  description: {
+    marginTop: 2,
   },
 });
