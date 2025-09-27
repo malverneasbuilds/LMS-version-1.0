@@ -240,9 +240,9 @@ export function AnimalFCRTable({ onAddFeedIntake }: AnimalFCRTableProps) {
                 <Text 
                   variant="body2" 
                   style={[styles.cell, styles.gainCell]}
-                  color={animal.weight_gain > 0 ? 'success.600' : animal.weight_gain < 0 ? 'error.600' : 'neutral.400'}
+                  color={animal.weight_gain && animal.weight_gain > 0 ? 'success.600' : animal.weight_gain && animal.weight_gain < 0 ? 'error.600' : 'neutral.400'}
                 >
-                  {animal.weight_gain !== 0 ? animal.weight_gain.toFixed(1) : 'No data'}
+                  {animal.weight_gain && animal.weight_gain !== 0 ? animal.weight_gain.toFixed(1) : 'No data'}
                 </Text>
                 <Text 
                   variant="body2" 
