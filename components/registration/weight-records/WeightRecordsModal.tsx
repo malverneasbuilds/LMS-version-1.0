@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-nat
 import { Text } from '../../typography/Text';
 import { TextField } from '../../inputs/TextField';
 import { Picker } from '../../inputs/Picker';
+import { BCSPicker } from '../../inputs/BCSPicker';
 import { DatePicker } from '../../inputs/DatePicker';
 import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
