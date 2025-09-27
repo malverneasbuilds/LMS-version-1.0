@@ -75,7 +75,6 @@ export function WeightRecordsTable({
         current_weight: latestWeight?.weight || null,
         feed_consumed: latestWeight?.feed_consumed || null,
         body_condition_score: latestWeight?.body_condition_score || null,
-        body_condition_score: latestWeight?.body_condition_score || null,
         fcr: fcr > 0 ? fcr : null,
         last_weight_date: latestWeight?.weight_date || null,
       };
@@ -113,9 +112,6 @@ export function WeightRecordsTable({
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.weightCell]}>
               Current Weight
-            </Text>
-            <Text variant="caption" weight="medium" style={[styles.cell, styles.bcsCell]}>
-              Body Condition Score
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.fcrCell]}>
               Feed Conversion Ratio
