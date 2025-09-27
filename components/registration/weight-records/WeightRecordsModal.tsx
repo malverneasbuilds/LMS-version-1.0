@@ -85,13 +85,14 @@ export function WeightRecordsModal({
         return;
       }
 
-    const recordToSave = {
+      const recordToSave = {
         animal_tag: formData.animal_tag,
-      weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
+        weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
         weight: formData.weight,
         feed_consumed: formData.feed_consumed,
+        body_condition_score: formData.body_condition_score,
         notes: formData.notes,
-    };
+      };
       
       if (editRecord) {
         await updateRecord(editRecord.id, recordToSave);
@@ -104,10 +105,16 @@ export function WeightRecordsModal({
         onSave(recordToSave);
       }
       
-    onClose();
+      onClose();
     } catch (error) {
       console.error('Error saving weight record:', error);
-      alert('Error saving weight record. Please try again.');
+      
+      // Handle specific duplicate key error
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+        alert('A weight record for this animal already exists on this date. Please choose a different date or edit the existing record.');
+      } else {
+        alert('Error saving weight record. Please try again.');
+      }
     }
   };
 
