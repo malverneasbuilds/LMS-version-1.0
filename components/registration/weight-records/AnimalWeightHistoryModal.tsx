@@ -31,8 +31,6 @@ export function AnimalWeightHistoryModal({
 }: AnimalWeightHistoryModalProps) {
   const { weightRecordsData } = useWeightRecords();
 
-  const { weightRecordsData } = useWeightRecords();
-
   // Sort records by date (newest first)
   const sortedRecords = (weightRecordsData || [])
     .filter(record => record.animal_tag === animalTag)
