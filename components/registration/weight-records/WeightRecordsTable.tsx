@@ -22,6 +22,7 @@ interface AnimalWeightSummary {
   sex: string;
   age: number;
   current_weight: number | null;
+  fcr: number | null;
   last_weight_date: string | null;
 }
 interface WeightRecordsTableProps {
@@ -44,7 +45,7 @@ export function WeightRecordsTable({
   onAddFeedIntake
 }: WeightRecordsTableProps) {
   const { herdData } = useHerd();
-  const { weightRecordsData, getLatestWeightForAnimal } = useWeightRecords();
+  const { weightRecordsData, getLatestWeightForAnimal, calculateFCRForAnimal } = useWeightRecords();
 
   // Helper function to calculate age from date of birth
   const calculateAge = (dateOfBirth: string): number => {
@@ -64,6 +65,7 @@ export function WeightRecordsTable({
   const getAnimalWeightSummary = (): AnimalWeightSummary[] => {
     return herdData.map(animal => {
       const latestWeight = getLatestWeightForAnimal(animal.tag_number);
+      const fcr = calculateFCRForAnimal(animal.tag_number);
       
       return {
         tag_number: animal.tag_number,
@@ -71,6 +73,7 @@ export function WeightRecordsTable({
         sex: animal.sex,
         age: calculateAge(animal.date_of_birth),
         current_weight: latestWeight?.weight || null,
+        fcr: fcr > 0 ? fcr : null,
         last_weight_date: latestWeight?.weight_date || null,
       };
     });
@@ -107,6 +110,9 @@ export function WeightRecordsTable({
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.weightCell]}>
               Current Weight
+            </Text>
+            <Text variant="caption" weight="medium" style={[styles.cell, styles.fcrCell]}>
+              FCR
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.dateCell]}>
               Last Recorded
@@ -146,6 +152,13 @@ export function WeightRecordsTable({
                 color={animal.current_weight ? 'neutral.800' : 'neutral.400'}
               >
                 {animal.current_weight ? `${animal.current_weight} kg` : 'No data'}
+              </Text>
+              <Text 
+                variant="body2" 
+                style={[styles.cell, styles.fcrCell]}
+                color={animal.fcr ? (animal.fcr <= 6 ? 'success.600' : animal.fcr <= 8 ? 'warning.600' : 'error.600') : 'neutral.400'}
+              >
+                {animal.fcr ? animal.fcr.toFixed(2) : 'No data'}
               </Text>
               <Text 
                 variant="caption" 
@@ -256,6 +269,9 @@ const styles = StyleSheet.create({
   },
   weightCell: {
     width: 120,
+  },
+  fcrCell: {
+    width: 80,
   },
   dateCell: {
     width: 100,

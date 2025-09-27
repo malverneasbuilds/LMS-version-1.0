@@ -39,6 +39,7 @@ export function WeightRecordsModal({
     animal_tag: '',
     weight_date: null as Date | null,
     weight: 0,
+    feed_consumed: 0,
     notes: '',
   });
 
@@ -53,6 +54,7 @@ export function WeightRecordsModal({
         animal_tag: editRecord.animal_tag,
         weight_date: new Date(editRecord.weight_date),
         weight: editRecord.weight,
+        feed_consumed: editRecord.feed_consumed || 0,
         notes: editRecord.notes,
       });
     } else if (preselectedAnimal) {
@@ -60,6 +62,7 @@ export function WeightRecordsModal({
         animal_tag: preselectedAnimal,
         weight_date: new Date(), // Default to today
         weight: 0,
+        feed_consumed: 0,
         notes: '',
       });
     } else {
@@ -67,6 +70,7 @@ export function WeightRecordsModal({
         animal_tag: '',
         weight_date: new Date(), // Default to today
         weight: 0,
+        feed_consumed: 0,
         notes: '',
       });
     }
@@ -74,7 +78,7 @@ export function WeightRecordsModal({
 
   const handleSave = async () => {
     try {
-      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0) {
+      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0 || formData.feed_consumed < 0) {
         alert('Please fill in all required fields');
         return;
       }
@@ -83,6 +87,7 @@ export function WeightRecordsModal({
         animal_tag: formData.animal_tag,
       weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
         weight: formData.weight,
+        feed_consumed: formData.feed_consumed,
         notes: formData.notes,
     };
       
@@ -136,6 +141,14 @@ export function WeightRecordsModal({
             value={formData.weight.toString()}
             onChangeText={(text) => setFormData({ ...formData, weight: parseFloat(text) || 0 })}
             placeholder="Enter weight"
+            keyboardType="numeric"
+          />
+
+          <TextField
+            label="Feed Consumed This Month (kg)"
+            value={formData.feed_consumed.toString()}
+            onChangeText={(text) => setFormData({ ...formData, feed_consumed: parseFloat(text) || 0 })}
+            placeholder="Enter feed consumed this month"
             keyboardType="numeric"
           />
 

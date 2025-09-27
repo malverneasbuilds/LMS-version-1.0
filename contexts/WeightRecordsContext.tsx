@@ -7,6 +7,7 @@ export interface WeightRecord {
   animal_tag: string;
   weight_date: string;
   weight: number;
+  feed_consumed: number;
   notes: string;
   created_at: string;
   updated_at: string;
@@ -21,6 +22,7 @@ interface WeightRecordsContextType {
   getAnimalWeightHistory: (animalTag: string) => WeightRecord[];
   getLatestWeightForAnimal: (animalTag: string) => WeightRecord | null;
   calculateWeightGainForAnimal: (animalTag: string) => number;
+  calculateFCRForAnimal: (animalTag: string) => number;
   refreshData: () => Promise<void>;
 }
 
@@ -143,6 +145,22 @@ export function WeightRecordsProvider({ children }: { children: React.ReactNode 
     return lastRecord.weight - firstRecord.weight;
   };
 
+  const calculateFCRForAnimal = (animalTag: string): number => {
+    const history = getAnimalWeightHistory(animalTag);
+    if (history.length < 2) return 0;
+    
+    // Get the last two records to calculate monthly FCR
+    const sortedHistory = history.sort((a, b) => new Date(b.weight_date).getTime() - new Date(a.weight_date).getTime());
+    const latestRecord = sortedHistory[0];
+    const previousRecord = sortedHistory[1];
+    
+    const weightGain = latestRecord.weight - previousRecord.weight;
+    const feedConsumed = latestRecord.feed_consumed || 0;
+    
+    // FCR = Feed Consumed / Weight Gain
+    return weightGain > 0 ? feedConsumed / weightGain : 0;
+  };
+
   const refreshData = async () => {
     await fetchData();
   };
@@ -158,6 +176,7 @@ export function WeightRecordsProvider({ children }: { children: React.ReactNode 
         getAnimalWeightHistory,
         getLatestWeightForAnimal,
         calculateWeightGainForAnimal,
+        calculateFCRForAnimal,
         refreshData,
       }}
     >
