@@ -153,6 +153,21 @@ export function WeightRecordsModal({
           />
 
           <TextField
+            label="Body Condition Score (1.0 - 5.0)"
+            value={formData.body_condition_score.toString()}
+            onChangeText={(text) => {
+              const value = parseFloat(text) || 3.0;
+              // Ensure value is between 1.0 and 5.0
+              const clampedValue = Math.max(1.0, Math.min(5.0, value));
+              // Round to nearest 0.25
+              const roundedValue = Math.round(clampedValue * 4) / 4;
+              setFormData({ ...formData, body_condition_score: roundedValue });
+            }}
+            placeholder="Enter body condition score (1.0-5.0)"
+            keyboardType="numeric"
+          />
+
+          <TextField
             label="Notes"
             value={formData.notes}
             onChangeText={(text) => setFormData({ ...formData, notes: text })}

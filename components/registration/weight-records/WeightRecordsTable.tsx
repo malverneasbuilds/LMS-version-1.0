@@ -111,6 +111,12 @@ export function WeightRecordsTable({
             <Text variant="caption" weight="medium" style={[styles.cell, styles.weightCell]}>
               Current Weight
             </Text>
+            <Text variant="caption" weight="medium" style={[styles.cell, styles.feedConsumedCell]}>
+              Feed Consumed (kg)
+            </Text>
+            <Text variant="caption" weight="medium" style={[styles.cell, styles.bcsCell]}>
+              Body Condition Score
+            </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.fcrCell]}>
               Feed Conversion Ratio
             </Text>
