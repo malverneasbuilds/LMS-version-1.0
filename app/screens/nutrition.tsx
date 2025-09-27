@@ -14,7 +14,6 @@ import { useHealthRecord } from '../../contexts/HealthRecordContext';
 import { useFeedInventory } from '../../contexts/FeedInventoryContext';
 import { useWeightRecords } from '../../contexts/WeightRecordsContext';
 import { useAnimalFeedIntake } from '../../contexts/AnimalFeedIntakeContext';
-import { useAnimalFCR } from '../../contexts/AnimalFCRContext';
 import { 
   calculateDLWG, 
   calculateADG, 
@@ -51,7 +50,6 @@ function NutritionContent() {
   const { feedInventoryData, feedConsumptionData } = useFeedInventory();
   const { weightRecordsData } = useWeightRecords();
   const { animalFeedIntakeData } = useAnimalFeedIntake();
-  const { getAverageHerdFCR } = useAnimalFCR();
 
   // Calculate total weight gain from all animals in the last 12 months
   const calculateTotalWeightGain = (): number => {
