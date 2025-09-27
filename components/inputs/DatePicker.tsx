@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     color: Colors.neutral[800],
     paddingRight: 16,
     paddingVertical: 16,
-    outline: 'none',
+    outlineStyle: 'none',
     border: 'none',
     backgroundColor: 'transparent',
   },

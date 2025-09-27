@@ -29,11 +29,10 @@ export function AnimalWeightHistoryModal({
   animalTag, 
   onAddWeight 
 }: AnimalWeightHistoryModalProps) {
-  const { weightRecordsData } = useWeightRecords();
+  const { getAnimalWeightHistory } = useWeightRecords();
 
   // Sort records by date (newest first)
-  const sortedRecords = (weightRecordsData || [])
-    .filter(record => record.animal_tag === animalTag)
+  const sortedRecords = getAnimalWeightHistory(animalTag)
     .sort((a, b) => new Date(b.weight_date).getTime() - new Date(a.weight_date).getTime());
 
   // Calculate weight trends

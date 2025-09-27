@@ -3,47 +3,114 @@ import { CalfRecord } from '../contexts/CalfContext';
 import { MortalityRecord } from '../contexts/MortalityContext';
 import { HealthRecord } from '../contexts/HealthRecordContext';
 
-// Calculate Daily Live Weight Gain (DLWG)
-export const calculateDLWG = (weightRecords: { animal_tag: string; weight_date: string; weight: number }[]): number => {
+// Calculate Weight Gain Metrics (WGM) for individual animals
+export const calculateAnimalWGM = (
+  animalTag: string, 
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  dateOfBirth: string
+): number => {
+  const animalRecords = weightRecords
+    .filter(record => record.animal_tag === animalTag)
+    .sort((a, b) => new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime());
+  
+  if (animalRecords.length < 2) return 0;
+  
+  const firstRecord = animalRecords[0];
+  const lastRecord = animalRecords[animalRecords.length - 1];
+  
+  // Calculate age in days from birth to last weight record
+  const birthDate = new Date(dateOfBirth);
+  const lastWeightDate = new Date(lastRecord.weight_date);
+  const ageInDays = Math.abs((lastWeightDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (ageInDays === 0) return 0;
+  
+  // Calculate DLWG: (current weight - previous weight) / age in days
+  const weightGain = lastRecord.weight - firstRecord.weight;
+  const dlwg = weightGain / ageInDays;
+  
+  // Calculate ADG for this specific animal (using birth weight if available)
+  // For now, we'll use a simplified ADG calculation
+  const daysBetweenRecords = Math.abs(
+    (new Date(lastRecord.weight_date).getTime() - new Date(firstRecord.weight_date).getTime()) 
+    / (1000 * 60 * 60 * 24)
+  );
+  const adg = daysBetweenRecords > 0 ? weightGain / daysBetweenRecords : 0;
+  
+  // WGM = DLWG / ADG
+  return adg > 0 ? dlwg / adg : 0;
+};
+
+// Calculate average WGM across all animals
+export const calculateAverageWGM = (
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  herdData: { tag_number: string; date_of_birth: string }[]
+): number => {
   if (weightRecords.length < 2) return 0;
   
-  // Group records by animal
-  const animalWeights: { [key: string]: typeof weightRecords } = {};
-  weightRecords.forEach(record => {
-    if (!animalWeights[record.animal_tag]) {
-      animalWeights[record.animal_tag] = [];
-    }
-    animalWeights[record.animal_tag].push(record);
-  });
+  const animalWGMs: number[] = [];
   
-  let totalDLWG = 0;
-  let animalCount = 0;
-  
-  // Calculate DLWG for each animal and average them
-  Object.values(animalWeights).forEach(records => {
-    if (records.length >= 2) {
-      // Sort by date
-      const sortedRecords = records.sort((a, b) => 
-        new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime()
-      );
-      
-      const firstRecord = sortedRecords[0];
-      const lastRecord = sortedRecords[sortedRecords.length - 1];
-      
-      const weightGain = lastRecord.weight - firstRecord.weight;
-      const daysDiff = Math.abs(
-        (new Date(lastRecord.weight_date).getTime() - new Date(firstRecord.weight_date).getTime()) 
-        / (1000 * 60 * 60 * 24)
-      );
-      
-      if (daysDiff > 0 && weightGain > 0) {
-        totalDLWG += weightGain / daysDiff;
-        animalCount++;
+  // Calculate WGM for each animal that has weight records
+  herdData.forEach(animal => {
+    const animalRecords = weightRecords.filter(record => record.animal_tag === animal.tag_number);
+    
+    if (animalRecords.length >= 2) {
+      const wgm = calculateAnimalWGM(animal.tag_number, weightRecords, animal.date_of_birth);
+      if (wgm > 0 && !isNaN(wgm) && isFinite(wgm)) {
+        animalWGMs.push(wgm);
       }
     }
   });
   
-  return animalCount > 0 ? totalDLWG / animalCount : 0;
+  // Return average WGM across all animals
+  return animalWGMs.length > 0 ? animalWGMs.reduce((sum, wgm) => sum + wgm, 0) / animalWGMs.length : 0;
+};
+
+// Calculate Daily Live Weight Gain (DLWG) for individual animal
+export const calculateAnimalDLWG = (
+  animalTag: string,
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  dateOfBirth: string
+): number => {
+  const animalRecords = weightRecords
+    .filter(record => record.animal_tag === animalTag)
+    .sort((a, b) => new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime());
+  
+  if (animalRecords.length < 2) return 0;
+  
+  const firstRecord = animalRecords[0];
+  const lastRecord = animalRecords[animalRecords.length - 1];
+  
+  // Calculate age in days from birth to last weight record
+  const birthDate = new Date(dateOfBirth);
+  const lastWeightDate = new Date(lastRecord.weight_date);
+  const ageInDays = Math.abs((lastWeightDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (ageInDays === 0) return 0;
+  
+  // DLWG = (current weight - previous weight) / age in days
+  const weightGain = lastRecord.weight - firstRecord.weight;
+  return weightGain / ageInDays;
+};
+
+// Calculate average DLWG across all animals (for backward compatibility)
+export const calculateDLWG = (
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  herdData: { tag_number: string; date_of_birth: string }[]
+): number => {
+  if (weightRecords.length < 2) return 0;
+  
+  const animalDLWGs: number[] = [];
+  
+  // Calculate DLWG for each animal that has weight records
+  herdData.forEach(animal => {
+    const dlwg = calculateAnimalDLWG(animal.tag_number, weightRecords, animal.date_of_birth);
+    if (dlwg > 0 && !isNaN(dlwg) && isFinite(dlwg)) {
+      animalDLWGs.push(dlwg);
+    }
+  });
+  
+  return animalDLWGs.length > 0 ? animalDLWGs.reduce((sum, dlwg) => sum + dlwg, 0) / animalDLWGs.length : 0;
 };
 
 // Calculate Average Daily Gain (ADG)
@@ -199,4 +266,77 @@ export const calculate100DayInCalfRate = (pregnancyData: any[]): number => {
   }).length;
   
   return totalServed > 0 ? (pregnantAt100Days / totalServed) * 100 : 0;
+};
+// Calculate individual animal FCR
+export const calculateAnimalFCR = (
+  animalTag: string,
+  startDate: string,
+  endDate: string,
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  feedIntakeRecords: { animal_tag: string; intake_date: string; amount_consumed: number }[]
+): { fcr: number; totalFeedConsumed: number; weightGain: number } => {
+  // Get weight records for the animal within the period
+  const animalWeights = weightRecords
+    .filter(record => 
+      record.animal_tag === animalTag &&
+      record.weight_date >= startDate &&
+      record.weight_date <= endDate
+    )
+    .sort((a, b) => new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime());
+
+  // Get feed intake records for the animal within the period
+  const animalFeedIntake = feedIntakeRecords
+    .filter(record => 
+      record.animal_tag === animalTag &&
+      record.intake_date >= startDate &&
+      record.intake_date <= endDate
+    );
+
+  // Calculate total feed consumed
+  const totalFeedConsumed = animalFeedIntake.reduce((sum, record) => sum + record.amount_consumed, 0);
+
+  // Calculate weight gain (final weight - induction weight)
+  let weightGain = 0;
+  if (animalWeights.length >= 2) {
+    const inductionWeight = animalWeights[0].weight; // First weight in period
+    const finalWeight = animalWeights[animalWeights.length - 1].weight; // Last weight in period
+    weightGain = finalWeight - inductionWeight;
+  }
+
+  // Calculate FCR
+  const fcr = weightGain > 0 ? totalFeedConsumed / weightGain : 0;
+
+  return {
+    fcr,
+    totalFeedConsumed,
+    weightGain,
+  };
+};
+
+// Calculate average FCR across all animals in the herd
+export const calculateAverageHerdFCR = (
+  startDate: string,
+  endDate: string,
+  herdData: { tag_number: string }[],
+  weightRecords: { animal_tag: string; weight_date: string; weight: number }[],
+  feedIntakeRecords: { animal_tag: string; intake_date: string; amount_consumed: number }[]
+): number => {
+  const animalFCRs: number[] = [];
+
+  herdData.forEach(animal => {
+    const { fcr } = calculateAnimalFCR(
+      animal.tag_number,
+      startDate,
+      endDate,
+      weightRecords,
+      feedIntakeRecords
+    );
+
+    // Only include valid FCRs (positive and reasonable values)
+    if (fcr > 0 && fcr < 50 && !isNaN(fcr) && isFinite(fcr)) {
+      animalFCRs.push(fcr);
+    }
+  });
+
+  return animalFCRs.length > 0 ? animalFCRs.reduce((sum, fcr) => sum + fcr, 0) / animalFCRs.length : 0;
 };

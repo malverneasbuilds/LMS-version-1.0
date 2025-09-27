@@ -10,6 +10,8 @@ import { SalesProvider } from '../contexts/SalesContext';
 import { HealthRecordProvider } from '../contexts/HealthRecordContext';
 import { FeedInventoryProvider } from '../contexts/FeedInventoryContext';
 import { WeightRecordsProvider } from '../contexts/WeightRecordsContext';
+import { AnimalFeedIntakeProvider } from '../contexts/AnimalFeedIntakeContext';
+import { AnimalFCRProvider } from '../contexts/AnimalFCRContext';
 import Colors from '../constants/Colors';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
@@ -34,6 +36,8 @@ export default function RootLayout() {
                 <HealthRecordProvider>
                   <FeedInventoryProvider>
                     <WeightRecordsProvider>
+                      <AnimalFeedIntakeProvider>
+                        <AnimalFCRProvider>
             <Stack
               screenOptions={{
                 headerTitleStyle: {
@@ -76,6 +80,8 @@ export default function RootLayout() {
             </Stack>
             <StatusBar style="dark" />
 
+                        </AnimalFCRProvider>
+                      </AnimalFeedIntakeProvider>
                     </WeightRecordsProvider>
                   </FeedInventoryProvider>
                 </HealthRecordProvider>

@@ -13,6 +13,8 @@ import { useMortality } from '../../contexts/MortalityContext';
 import { useSales } from '../../contexts/SalesContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
 import { useFeedInventory } from '../../contexts/FeedInventoryContext';
+import { useAnimalFeedIntake } from '../../contexts/AnimalFeedIntakeContext';
+import { useAnimalFCR } from '../../contexts/AnimalFCRContext';
 
 // Import all the table components
 import { HerdRegisterTable } from '../../components/registration/herd-register/HerdRegisterTable';
@@ -38,6 +40,8 @@ import { HealthRecordModal } from '../../components/registration/health-record/H
 import { WeightRecordsTable } from '../../components/registration/weight-records/WeightRecordsTable';
 import { WeightRecordsModal } from '../../components/registration/weight-records/WeightRecordsModal';
 import { AnimalWeightHistoryModal } from '../../components/registration/weight-records/AnimalWeightHistoryModal';
+import { AnimalFeedIntakeModal } from '../../components/registration/animal-feed-intake/AnimalFeedIntakeModal';
+import { AnimalFCRTable } from '../../components/registration/animal-fcr/AnimalFCRTable';
 
 // Sample data for registers not yet connected to context
 const sampleData = {
@@ -79,6 +83,8 @@ function RegisterContent() {
   const { salesData, addRecord: addSalesRecord, updateRecord: updateSalesRecord, deleteRecord: deleteSalesRecord } = useSales();
   const { healthRecordData, addRecord: addHealthRecord, updateRecord: updateHealthRecord, deleteRecord: deleteHealthRecord } = useHealthRecord();
   const { feedInventoryData, addInventoryRecord: addFeedRecord, updateInventoryRecord: updateFeedRecord, deleteInventoryRecord: deleteFeedRecord } = useFeedInventory();
+  const { addRecord: addFeedIntakeRecord } = useAnimalFeedIntake();
+  const { calculateAndStoreFCR } = useAnimalFCR();
   
   const [activeTab, setActiveTab] = useState('herd');
   
@@ -96,6 +102,8 @@ function RegisterContent() {
   const [weightRecordsModalVisible, setWeightRecordsModalVisible] = useState(false);
   const [weightHistoryModalVisible, setWeightHistoryModalVisible] = useState(false);
   const [selectedAnimalForWeight, setSelectedAnimalForWeight] = useState<string>('');
+  const [feedIntakeModalVisible, setFeedIntakeModalVisible] = useState(false);
+  const [selectedAnimalForFeed, setSelectedAnimalForFeed] = useState<string>('');
   
   // Edit record states
   const [editingHerdRecord, setEditingHerdRecord] = useState(null);
@@ -498,13 +506,26 @@ function RegisterContent() {
   };
 
   const handleSaveWeightRecord = (record: any) => {
-    if (editingWeightRecord) {
-      setWeightRecordsData(weightRecordsData.map(item => 
-        item.id === editingWeightRecord.id ? { ...record, id: editingWeightRecord.id } : item
-      ));
-    } else {
-      setWeightRecordsData([...weightRecordsData, { ...record, id: Date.now().toString() }]);
+    // The modal now handles saving directly to the database
+    // This function can be used for additional logic if needed
+    console.log('Weight record saved:', record);
+  };
+
+  // Feed Intake handlers
+  const handleAddFeedIntakeForAnimal = (animalTag: string) => {
+    setSelectedAnimalForFeed(animalTag);
+    setFeedIntakeModalVisible(true);
+  };
+
+  const handleSaveFeedIntake = async (record: any) => {
+    await addFeedIntakeRecord(record);
+    // Auto-calculate FCR after adding feed intake
+    try {
+      await calculateAndStoreFCR(record.animal_tag);
+    } catch (error) {
+      console.error('Error calculating FCR:', error);
     }
+    setFeedIntakeModalVisible(false);
   };
 
   const tabs = [
@@ -519,6 +540,7 @@ function RegisterContent() {
     { id: 'health', title: 'Health Record' },
     { id: 'heat', title: 'Heat Detection' },
     { id: 'weight', title: 'Weight Records' },
+    { id: 'fcr', title: 'Feed Conversion Ratio' },
   ];
 
   const renderContent = () => {
@@ -703,6 +725,7 @@ function RegisterContent() {
               onDelete={handleDeleteWeightRecord}
               onAddWeight={handleAddWeightForAnimal}
               onViewWeights={handleViewAnimalWeights}
+              onAddFeedIntake={handleAddFeedIntakeForAnimal}
             />
             <WeightRecordsModal
               visible={weightRecordsModalVisible}
@@ -719,6 +742,26 @@ function RegisterContent() {
                 setWeightHistoryModalVisible(false);
                 handleAddWeightForAnimal(selectedAnimalForWeight);
               }}
+            />
+            <AnimalFeedIntakeModal
+              visible={feedIntakeModalVisible}
+              onClose={() => setFeedIntakeModalVisible(false)}
+              onSave={handleSaveFeedIntake}
+              preselectedAnimal={selectedAnimalForFeed}
+            />
+          </>
+        );
+      case 'fcr':
+        return (
+          <>
+            <AnimalFCRTable
+              onAddFeedIntake={handleAddFeedIntakeForAnimal}
+            />
+            <AnimalFeedIntakeModal
+              visible={feedIntakeModalVisible}
+              onClose={() => setFeedIntakeModalVisible(false)}
+              onSave={handleSaveFeedIntake}
+              preselectedAnimal={selectedAnimalForFeed}
             />
           </>
         );

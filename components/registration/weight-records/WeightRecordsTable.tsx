@@ -29,10 +29,9 @@ interface WeightRecordsTableProps {
   onAdd: () => void;
   onEdit: (record: WeightRecord) => void;
   onDelete: (id: string) => void;
-  onAddWeight?: (animalTag: string) => void;
-  onViewWeights?: (animalTag: string) => void;
   onAddWeight: (animalTag: string) => void;
   onViewWeights: (animalTag: string) => void;
+  onAddFeedIntake: (animalTag: string) => void;
 }
 
 export function WeightRecordsTable({ 
@@ -41,10 +40,11 @@ export function WeightRecordsTable({
   onEdit, 
   onDelete, 
   onAddWeight, 
-  onViewWeights 
+  onViewWeights,
+  onAddFeedIntake
 }: WeightRecordsTableProps) {
   const { herdData } = useHerd();
-  const { weightRecordsData } = useWeightRecords();
+  const { weightRecordsData, getLatestWeightForAnimal } = useWeightRecords();
 
   // Helper function to calculate age from date of birth
   const calculateAge = (dateOfBirth: string): number => {
@@ -63,12 +63,7 @@ export function WeightRecordsTable({
   // Get current weight for each animal
   const getAnimalWeightSummary = (): AnimalWeightSummary[] => {
     return herdData.map(animal => {
-      // Find the most recent weight record for this animal
-      const animalWeights = weightRecordsData
-        .filter(record => record.animal_tag === animal.tag_number)
-        .sort((a, b) => new Date(b.weight_date).getTime() - new Date(a.weight_date).getTime());
-      
-      const latestWeight = animalWeights[0];
+      const latestWeight = getLatestWeightForAnimal(animal.tag_number);
       
       return {
         tag_number: animal.tag_number,
@@ -117,7 +112,10 @@ export function WeightRecordsTable({
               Last Recorded
             </Text>
             <Text variant="caption" weight="medium" style={[styles.cell, styles.actionsCell]}>
-              Actions
+              Weight Actions
+            </Text>
+            <Text variant="caption" weight="medium" style={[styles.cell, styles.feedActionsCell]}>
+              Feed Actions
             </Text>
           </View>
 
@@ -174,6 +172,19 @@ export function WeightRecordsTable({
                     <Eye size={14} color={Colors.primary[500]} />
                     <Text variant="caption" color="primary.500" style={styles.buttonText}>
                       View
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={[styles.cell, styles.feedActionsCell]}>
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.feedButton]}
+                    onPress={() => onAddFeedIntake(animal.tag_number)}
+                  >
+                    <Scale size={14} color={Colors.white} />
+                    <Text variant="caption" color="white" style={styles.buttonText}>
+                      Feed
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -252,6 +263,9 @@ const styles = StyleSheet.create({
   actionsCell: {
     width: 160,
   },
+  feedActionsCell: {
+    width: 80,
+  },
   actionButtons: {
     flexDirection: 'row',
     gap: 4,
@@ -271,6 +285,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.primary[500],
+  },
+  feedButton: {
+    backgroundColor: Colors.warning[500],
   },
   buttonText: {
     fontSize: 11,

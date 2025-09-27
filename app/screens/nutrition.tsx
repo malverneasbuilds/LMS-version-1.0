@@ -13,10 +13,13 @@ import { useCalf } from '../../contexts/CalfContext';
 import { useHealthRecord } from '../../contexts/HealthRecordContext';
 import { useFeedInventory } from '../../contexts/FeedInventoryContext';
 import { useWeightRecords } from '../../contexts/WeightRecordsContext';
+import { useAnimalFeedIntake } from '../../contexts/AnimalFeedIntakeContext';
+import { useAnimalFCR } from '../../contexts/AnimalFCRContext';
 import { 
   calculateDLWG, 
   calculateADG, 
   calculateAverageBCS,
+  calculateAverageWGM,
   getPerformanceColor 
 } from '../../utils/calculations';
 
@@ -47,6 +50,8 @@ function NutritionContent() {
   const { healthRecordData } = useHealthRecord();
   const { feedInventoryData, feedConsumptionData } = useFeedInventory();
   const { weightRecordsData } = useWeightRecords();
+  const { animalFeedIntakeData } = useAnimalFeedIntake();
+  const { getAverageHerdFCR } = useAnimalFCR();
 
   // Calculate total weight gain from all animals in the last 12 months
   const calculateTotalWeightGain = (): number => {
@@ -116,30 +121,28 @@ function NutritionContent() {
 
   // Calculate Feed Conversion Ratio (FCR)
   const calculateFCR = (): number => {
-    const totalFeedConsumed = calculateTotalFeedConsumption();
-    const totalWeightGain = calculateTotalWeightGain();
-    
-    // FCR = Feed Consumed (kg) / Weight Gain (kg)
-    // Lower FCR is better (less feed needed per kg of weight gain)
-    return totalWeightGain > 0 ? totalFeedConsumed / totalWeightGain : 0;
+    // Get average FCR from stored records (6 month period)
+    return getAverageHerdFCR(6);
   };
 
   // Calculate nutrition metrics from actual data
   const calculateNutritionMetrics = (): NutritionMetric[] => {
-    const dlwg = calculateDLWG(weightRecordsData);
+    const wgm = calculateAverageWGM(weightRecordsData, herdData);
     const adg = calculateADG(calfData);
     const avgBCS = calculateAverageBCS(healthRecordData);
     const fcr = calculateFCR();
-    const totalFeedConsumed = calculateTotalFeedConsumption();
+    
+    // Calculate totals for display purposes
+    const totalFeedConsumed = animalFeedIntakeData.reduce((sum, record) => sum + record.amount_consumed, 0);
     const totalWeightGain = calculateTotalWeightGain();
 
     return [
       {
-        title: 'Daily Live Weight Gain (DLWG)',
-        value: dlwg,
-        target: 1.2,
-        unit: 'kg/day',
-        description: 'Average daily weight gain across all animals',
+        title: 'Weight Gain Metrics (WGM)',
+        value: wgm,
+        target: 1.0,
+        unit: 'ratio',
+        description: 'DLWG/ADG ratio - measures weight gain efficiency across all animals',
       },
       {
         title: 'Average Daily Gain (ADG)',
@@ -152,8 +155,8 @@ function NutritionContent() {
         title: 'Feed Conversion Ratio (FCR)',
         value: fcr,
         target: 6.0,
-        unit: `(${totalFeedConsumed.toFixed(0)}kg feed / ${totalWeightGain.toFixed(0)}kg gain)`,
-        description: 'Feed efficiency - lower is better',
+        unit: 'ratio',
+        description: 'Average FCR across all animals over 6 months - lower is better (6.0 or less is good)',
       },
       {
         title: 'Average Body Condition Score',

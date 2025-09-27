@@ -8,6 +8,7 @@ import { Button } from '../../ui/Button';
 import { X } from 'lucide-react-native';
 import Colors from '../../../constants/Colors';
 import { useHerd } from '../../../contexts/HerdContext';
+import { useWeightRecords } from '../../../contexts/WeightRecordsContext';
 
 interface WeightRecord {
   id: string;
@@ -33,6 +34,7 @@ export function WeightRecordsModal({
   preselectedAnimal 
 }: WeightRecordsModalProps) {
   const { herdData } = useHerd();
+  const { addRecord, updateRecord } = useWeightRecords();
   const [formData, setFormData] = useState({
     animal_tag: '',
     weight_date: null as Date | null,
@@ -70,13 +72,36 @@ export function WeightRecordsModal({
     }
   }, [editRecord, visible, preselectedAnimal]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    try {
+      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
     const recordToSave = {
-      ...formData,
+        animal_tag: formData.animal_tag,
       weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
+        weight: formData.weight,
+        notes: formData.notes,
     };
-    onSave(recordToSave);
+      
+      if (editRecord) {
+        await updateRecord(editRecord.id, recordToSave);
+      } else {
+        await addRecord(recordToSave);
+      }
+      
+      // Call the parent onSave if provided for additional handling
+      if (onSave) {
+        onSave(recordToSave);
+      }
+      
     onClose();
+    } catch (error) {
+      console.error('Error saving weight record:', error);
+      alert('Error saving weight record. Please try again.');
+    }
   };
 
   return (
