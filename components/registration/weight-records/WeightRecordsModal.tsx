@@ -15,8 +15,6 @@ interface WeightRecord {
   animal_tag: string;
   weight_date: string;
   weight: number;
-  feed_consumed: number;
-  body_condition_score: number;
   notes: string;
 }
 
@@ -42,7 +40,6 @@ export function WeightRecordsModal({
     weight_date: null as Date | null,
     weight: 0,
     feed_consumed: 0,
-    body_condition_score: 3.0,
     notes: '',
   });
 
@@ -58,7 +55,6 @@ export function WeightRecordsModal({
         weight_date: new Date(editRecord.weight_date),
         weight: editRecord.weight,
         feed_consumed: editRecord.feed_consumed || 0,
-        body_condition_score: editRecord.body_condition_score || 3.0,
         notes: editRecord.notes,
       });
     } else if (preselectedAnimal) {
@@ -67,7 +63,6 @@ export function WeightRecordsModal({
         weight_date: new Date(), // Default to today
         weight: 0,
         feed_consumed: 0,
-        body_condition_score: 3.0,
         notes: '',
       });
     } else {
@@ -76,7 +71,6 @@ export function WeightRecordsModal({
         weight_date: new Date(), // Default to today
         weight: 0,
         feed_consumed: 0,
-        body_condition_score: 3.0,
         notes: '',
       });
     }
@@ -84,19 +78,18 @@ export function WeightRecordsModal({
 
   const handleSave = async () => {
     try {
-      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0 || formData.feed_consumed < 0 || formData.body_condition_score < 1 || formData.body_condition_score > 5) {
+      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0 || formData.feed_consumed < 0) {
         alert('Please fill in all required fields');
         return;
       }
 
-      const recordToSave = {
+    const recordToSave = {
         animal_tag: formData.animal_tag,
-        weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
+      weight_date: formData.weight_date?.toISOString().split('T')[0] || '',
         weight: formData.weight,
         feed_consumed: formData.feed_consumed,
-        body_condition_score: formData.body_condition_score,
         notes: formData.notes,
-      };
+    };
       
       if (editRecord) {
         await updateRecord(editRecord.id, recordToSave);
@@ -156,21 +149,6 @@ export function WeightRecordsModal({
             value={formData.feed_consumed.toString()}
             onChangeText={(text) => setFormData({ ...formData, feed_consumed: parseFloat(text) || 0 })}
             placeholder="Enter feed consumed this month"
-            keyboardType="numeric"
-          />
-
-          <TextField
-            label="Body Condition Score (1.0 - 5.0)"
-            value={formData.body_condition_score.toString()}
-            onChangeText={(text) => {
-              const value = parseFloat(text) || 3.0;
-              // Round to nearest 0.25 increment
-              const rounded = Math.round(value * 4) / 4;
-              // Ensure it's within valid range
-              const clamped = Math.max(1.0, Math.min(5.0, rounded));
-              setFormData({ ...formData, body_condition_score: clamped });
-            }}
-            placeholder="Enter body condition score (1.0-5.0)"
             keyboardType="numeric"
           />
 
