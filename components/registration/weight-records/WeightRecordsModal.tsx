@@ -40,6 +40,7 @@ export function WeightRecordsModal({
     weight_date: null as Date | null,
     weight: 0,
     feed_consumed: 0,
+    body_condition_score: 3.0,
     notes: '',
   });
 
