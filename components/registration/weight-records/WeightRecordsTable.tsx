@@ -75,6 +75,7 @@ export function WeightRecordsTable({
         current_weight: latestWeight?.weight || null,
         feed_consumed: latestWeight?.feed_consumed || null,
         body_condition_score: latestWeight?.body_condition_score || null,
+        body_condition_score: latestWeight?.body_condition_score || null,
         fcr: fcr > 0 ? fcr : null,
         last_weight_date: latestWeight?.weight_date || null,
       };
