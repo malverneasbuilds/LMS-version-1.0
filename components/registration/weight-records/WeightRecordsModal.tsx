@@ -156,7 +156,7 @@ export function WeightRecordsModal({
 
           <TextField
             label="Body Condition Score (1.0 - 5.0)"
-            value={formData.body_condition_score.toString()}
+            value={formData.body_condition_score?.toString() || '3.0'}
             onChangeText={(text) => {
               const value = parseFloat(text) || 3.0;
               // Ensure value is between 1.0 and 5.0
