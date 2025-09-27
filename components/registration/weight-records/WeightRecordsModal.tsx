@@ -79,7 +79,7 @@ export function WeightRecordsModal({
 
   const handleSave = async () => {
     try {
-      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0 || formData.feed_consumed < 0) {
+      if (!formData.animal_tag || !formData.weight_date || formData.weight <= 0 || formData.feed_consumed < 0 || formData.body_condition_score < 1.0 || formData.body_condition_score > 5.0) {
         alert('Please fill in all required fields');
         return;
       }
