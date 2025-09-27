@@ -119,8 +119,12 @@ function NutritionContent() {
 
   // Calculate Feed Conversion Ratio (FCR)
   const calculateFCR = (): number => {
-    // Get average FCR from stored records (6 month period)
-    return getAverageHerdFCR(6);
+    // Calculate average FCR from weight records
+    const validFCRs = weightRecordsData
+      .filter(record => record.fcr && record.fcr > 0 && record.fcr < 50) // Filter out invalid FCRs
+      .map(record => record.fcr);
+    
+    return validFCRs.length > 0 ? validFCRs.reduce((sum, fcr) => sum + fcr, 0) / validFCRs.length : 0;
   };
 
   // Calculate nutrition metrics from actual data
