@@ -130,13 +130,37 @@ function NutritionContent() {
   // Calculate nutrition metrics from actual data
   const calculateNutritionMetrics = (): NutritionMetric[] => {
     const wgm = calculateAverageWGM(weightRecordsData, herdData);
-    const adg = calculateADG(calfData);
     const avgBCS = calculateAverageBCS(healthRecordData);
-    const fcr = calculateFCR();
     
-    // Calculate totals for display purposes
-    const totalFeedConsumed = animalFeedIntakeData.reduce((sum, record) => sum + record.amount_consumed, 0);
-    const totalWeightGain = calculateTotalWeightGain();
+    // Calculate nutrition deficiencies from health records
+    const nutritionDeficiencies = healthRecordData.filter(record => 
+      record.diagnosis?.toLowerCase().includes('nutrition') ||
+      record.diagnosis?.toLowerCase().includes('deficiency') ||
+      record.diagnosis?.toLowerCase().includes('mineral') ||
+      record.diagnosis?.toLowerCase().includes('vitamin')
+    ).length;
+    const nutritionDeficiencyPercentage = herdData.length > 0 ? (nutritionDeficiencies / herdData.length) * 100 : 0;
+    
+    // Calculate growth rate perception (animals with positive weight trends)
+    const animalsWithPositiveGrowth = herdData.filter(animal => {
+      const animalWeights = weightRecordsData
+        .filter(record => record.animal_tag === animal.tag_number)
+        .sort((a, b) => new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime());
+      
+      if (animalWeights.length < 2) return false;
+      
+      const firstWeight = animalWeights[0].weight;
+      const lastWeight = animalWeights[animalWeights.length - 1].weight;
+      return lastWeight > firstWeight;
+    }).length;
+    const growthRatePerception = herdData.length > 0 ? (animalsWithPositiveGrowth / herdData.length) * 100 : 0;
+    
+    // Calculate nutritional management score based on monitoring frequency
+    const totalWeightRecords = weightRecordsData.length;
+    const totalHealthRecords = healthRecordData.length;
+    const totalAnimals = herdData.length;
+    const averageRecordsPerAnimal = totalAnimals > 0 ? (totalWeightRecords + totalHealthRecords) / totalAnimals : 0;
+    const nutritionalManagement = Math.min(100, (averageRecordsPerAnimal / 6) * 100); // Target: 6 records per animal per year
 
     return [
       {
@@ -147,20 +171,6 @@ function NutritionContent() {
         description: 'DLWG/ADG ratio - measures weight gain efficiency across all animals',
       },
       {
-        title: 'Average Daily Gain (ADG)',
-        value: adg,
-        target: 1.5,
-        unit: 'kg/day',
-        description: 'Average daily gain for calves from birth to weaning',
-      },
-      {
-        title: 'Feed Conversion Ratio (FCR)',
-        value: fcr,
-        target: 6.0,
-        unit: 'ratio',
-        description: 'Average FCR across all animals over 6 months - lower is better (6.0 or less is good)',
-      },
-      {
         title: 'Average Body Condition Score',
         value: avgBCS,
         target: 3.5,
@@ -168,19 +178,25 @@ function NutritionContent() {
         description: 'Overall body condition of the herd',
       },
       {
-        title: 'Feed Cost per kg Gain',
-        value: totalFeedConsumed > 0 && totalWeightGain > 0 ? 
-          (feedInventoryData.reduce((sum, item) => sum + item.total_price, 0) / totalWeightGain) : 0,
-        target: 8.0,
-        unit: '$/kg',
-        description: 'Cost efficiency of feed conversion',
+        title: 'Nutrition Deficiencies',
+        value: nutritionDeficiencyPercentage,
+        target: 5.0,
+        unit: '%',
+        description: 'Percentage of animals with nutrition-related health issues',
       },
       {
-        title: 'Total Feed Consumed',
-        value: totalFeedConsumed,
-        target: herdData.length * 365 * 8, // 8kg per animal per day target
-        unit: 'kg/year',
-        description: 'Total feed consumption in the last 12 months',
+        title: 'Growth Rate Perception',
+        value: growthRatePerception,
+        target: 85.0,
+        unit: '%',
+        description: 'Percentage of animals showing positive weight gain trends',
+      },
+      {
+        title: 'Nutritional Management',
+        value: nutritionalManagement,
+        target: 100.0,
+        unit: '%',
+        description: 'Effectiveness of nutritional monitoring and management practices',
       },
     ];
   };
@@ -368,14 +384,14 @@ interface NutritionMetricCardProps {
 function NutritionMetricCard({ metric }: NutritionMetricCardProps) {
   // Determine if the metric is good, warning, or bad
   const getColor = () => {
-    const isInverse = metric.title.includes('FCR') || metric.title.includes('Cost');
+    const isInverse = metric.title.includes('Deficiencies');
     return getPerformanceColor(metric.value, metric.target, isInverse);
   };
 
   // Calculate percentage of target
   const getPercentage = () => {
-    // For FCR and cost metrics, calculate inversely (lower is better)
-    if (metric.title.includes('FCR') || metric.title.includes('Cost')) {
+    // For deficiency metrics, calculate inversely (lower is better)
+    if (metric.title.includes('Deficiencies')) {
       if (metric.value === 0) return 100;
       if (metric.target === 0) return 0;
       return Math.max(0, 100 - ((metric.value / metric.target) * 100));
@@ -389,7 +405,7 @@ function NutritionMetricCard({ metric }: NutritionMetricCardProps) {
     if (metric.title.includes('Weight') || metric.title.includes('ADG') || metric.title.includes('DLWG')) {
       return <Scale size={20} color={getColor()} />;
     }
-    if (metric.title.includes('FCR') || metric.title.includes('Cost')) {
+    if (metric.title.includes('Growth') || metric.title.includes('Management')) {
       return <TrendingUp size={20} color={getColor()} />;
     }
     if (metric.title.includes('BCS') || metric.title.includes('Body')) {
