@@ -157,6 +157,14 @@ export function WeightRecordsTable({
               </Text>
               <Text 
                 variant="body2" 
+                style={[styles.cell, styles.bcsCell]}
+                color={animal.current_weight ? 'neutral.800' : 'neutral.400'}
+              >
+                {animal.current_weight && latestWeight?.body_condition_score ? 
+                  latestWeight.body_condition_score.toFixed(2) : 'No data'}
+              </Text>
+              <Text 
+                variant="body2" 
                 style={[styles.cell, styles.fcrCell]}
                 color={animal.fcr ? (animal.fcr <= 6 ? 'success.600' : animal.fcr <= 8 ? 'warning.600' : 'error.600') : 'neutral.400'}
               >
@@ -273,6 +281,9 @@ const styles = StyleSheet.create({
     width: 60,
   },
   weightCell: {
+    width: 120,
+  },
+  bcsCell: {
     width: 120,
   },
   fcrCell: {
