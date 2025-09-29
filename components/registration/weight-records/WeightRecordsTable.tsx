@@ -160,8 +160,11 @@ export function WeightRecordsTable({
                 style={[styles.cell, styles.bcsCell]}
                 color={animal.current_weight ? 'neutral.800' : 'neutral.400'}
               >
-                {animal.current_weight && latestWeight?.body_condition_score ? 
-                  latestWeight.body_condition_score.toFixed(2) : 'No data'}
+                {(() => {
+                  const latestWeight = getLatestWeightForAnimal(animal.tag_number);
+                  return latestWeight?.body_condition_score ? 
+                    latestWeight.body_condition_score.toFixed(2) : 'No data';
+                })()}
               </Text>
               <Text 
                 variant="body2" 
