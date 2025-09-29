@@ -214,6 +214,9 @@ export function WeightRecordsTable({
           <Text variant="body" color="neutral.500">
             No animals found. Add animals to the Herd Register first.
           </Text>
+          <Text variant="caption" weight="medium" style={[styles.cell, styles.bcsCell]}>
+            Body Condition Score
+          </Text>
         </View>
       )}
     </Card>
