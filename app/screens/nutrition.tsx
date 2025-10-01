@@ -17,7 +17,6 @@ import { useAnimalFeedIntake } from '../../contexts/AnimalFeedIntakeContext';
 import { 
   calculateDLWG, 
   calculateADG, 
-  calculateAverageBCS,
   calculateAverageWGM,
   getPerformanceColor 
 } from '../../utils/calculations';
@@ -51,6 +50,41 @@ function NutritionContent() {
   const { weightRecordsData } = useWeightRecords();
   const { animalFeedIntakeData } = useAnimalFeedIntake();
 
+  // Calculate Body Condition Score average from weight records
+  const calculateAverageBCS = (): number => {
+    const validBCSRecords = weightRecordsData.filter(record => 
+      record.body_condition_score && record.body_condition_score > 0
+    );
+    
+    if (validBCSRecords.length === 0) return 3.0; // Default value
+    
+    const totalBCS = validBCSRecords.reduce((sum, record) => sum + record.body_condition_score, 0);
+    return totalBCS / validBCSRecords.length;
+  };
+
+  // Calculate average Growth Rate Perception from weight records
+  const calculateAverageGrowthRatePerception = (): number => {
+    const validGrowthRecords = weightRecordsData.filter(record => 
+      record.growth_rate_perception && record.growth_rate_perception > 0
+    );
+    
+    if (validGrowthRecords.length === 0) return 3.0; // Default value
+    
+    const totalGrowth = validGrowthRecords.reduce((sum, record) => sum + record.growth_rate_perception, 0);
+    return totalGrowth / validGrowthRecords.length;
+  };
+
+  // Calculate average Nutritional Deficiency from weight records
+  const calculateAverageNutritionalDeficiency = (): number => {
+    const validNutritionRecords = weightRecordsData.filter(record => 
+      record.nutritional_deficiency && record.nutritional_deficiency > 0
+    );
+    
+    if (validNutritionRecords.length === 0) return 1.0; // Default value (1 = excellent)
+    
+    const totalNutrition = validNutritionRecords.reduce((sum, record) => sum + record.nutritional_deficiency, 0);
+    return totalNutrition / validNutritionRecords.length;
+  };
   // Calculate total weight gain from all animals in the last 12 months
   const calculateTotalWeightGain = (): number => {
     const currentDate = new Date();
@@ -130,30 +164,9 @@ function NutritionContent() {
   // Calculate nutrition metrics from actual data
   const calculateNutritionMetrics = (): NutritionMetric[] => {
     const wgm = calculateAverageWGM(weightRecordsData, herdData);
-    const avgBCS = calculateAverageBCS(healthRecordData);
-    
-    // Calculate nutrition deficiencies from health records
-    const nutritionDeficiencies = healthRecordData.filter(record => 
-      record.diagnosis?.toLowerCase().includes('nutrition') ||
-      record.diagnosis?.toLowerCase().includes('deficiency') ||
-      record.diagnosis?.toLowerCase().includes('mineral') ||
-      record.diagnosis?.toLowerCase().includes('vitamin')
-    ).length;
-    const nutritionDeficiencyPercentage = herdData.length > 0 ? (nutritionDeficiencies / herdData.length) * 100 : 0;
-    
-    // Calculate growth rate perception (animals with positive weight trends)
-    const animalsWithPositiveGrowth = herdData.filter(animal => {
-      const animalWeights = weightRecordsData
-        .filter(record => record.animal_tag === animal.tag_number)
-        .sort((a, b) => new Date(a.weight_date).getTime() - new Date(b.weight_date).getTime());
-      
-      if (animalWeights.length < 2) return false;
-      
-      const firstWeight = animalWeights[0].weight;
-      const lastWeight = animalWeights[animalWeights.length - 1].weight;
-      return lastWeight > firstWeight;
-    }).length;
-    const growthRatePerception = herdData.length > 0 ? (animalsWithPositiveGrowth / herdData.length) * 100 : 0;
+    const avgBCS = calculateAverageBCS();
+    const avgGrowthRatePerception = calculateAverageGrowthRatePerception();
+    const avgNutritionalDeficiency = calculateAverageNutritionalDeficiency();
     
     // Calculate nutritional management score based on monitoring frequency
     const totalWeightRecords = weightRecordsData.length;
@@ -179,16 +192,16 @@ function NutritionContent() {
       },
       {
         title: 'Nutrition Deficiencies',
-        value: nutritionDeficiencyPercentage,
-        target: 5.0,
-        unit: '%',
+        value: avgNutritionalDeficiency,
+        target: 2.0,
+        unit: '/5',
         description: 'Percentage of animals with nutrition-related health issues',
       },
       {
         title: 'Growth Rate Perception',
-        value: growthRatePerception,
-        target: 85.0,
-        unit: '%',
+        value: avgGrowthRatePerception,
+        target: 4.0,
+        unit: '/5',
         description: 'Percentage of animals showing positive weight gain trends',
       },
       {
@@ -384,17 +397,16 @@ interface NutritionMetricCardProps {
 function NutritionMetricCard({ metric }: NutritionMetricCardProps) {
   // Determine if the metric is good, warning, or bad
   const getColor = () => {
-    const isInverse = metric.title.includes('Deficiencies');
+    const isInverse = metric.title.includes('Deficiencies'); // Lower nutritional deficiency score is better
     return getPerformanceColor(metric.value, metric.target, isInverse);
   };
 
   // Calculate percentage of target
   const getPercentage = () => {
-    // For deficiency metrics, calculate inversely (lower is better)
+    // For nutritional deficiency metrics, calculate inversely (lower score is better)
     if (metric.title.includes('Deficiencies')) {
-      if (metric.value === 0) return 100;
-      if (metric.target === 0) return 0;
-      return Math.max(0, 100 - ((metric.value / metric.target) * 100));
+      // For score-based deficiency (1-5 scale), invert the calculation
+      return Math.max(0, 100 - ((metric.value / 5) * 100));
     }
     
     // For other metrics, direct percentage
